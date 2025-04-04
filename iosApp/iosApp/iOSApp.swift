@@ -7,14 +7,15 @@ struct iOSApp: App {
     let backendApi: BackendApi
 
     init() {
-        let baseUrl: ProcessInfo.processInfo.environment["BASE_URL"]
-        self.tokenManager = TokenManagerProvider.createTokenManager()
+        let baseUrl: String = "http://localhost:8080/api"
+        let tokenManagerProvider = TokenManagerProvider()
+        self.tokenManager = tokenManagerProvider.createTokenManager()
         self.tokenManager.clearToken()
         self.backendApi = BackendApi(baseUrl: baseUrl, tokenManager: self.tokenManager)
     }
     var body: some Scene {
         WindowGroup {
-            ContentView(backendApi: backendApi)
+            ContentView(backendApi: self.backendApi)
         }
     }
 }
