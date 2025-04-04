@@ -42,10 +42,10 @@ class BackendApi(val baseUrl: String, private val tokenManager: TokenManager) {
         }
     }
 
-    suspend fun login(username: String, password: String): Boolean {
+    suspend fun login(loginRequest: LoginRequest): Boolean {
         return try {
             val response: HttpResponse = client.post("$baseUrl/authenticate") {
-                setBody(LoginRequest(username, password, false))
+                setBody(loginRequest)
             }
 
             if (response.status == HttpStatusCode.Unauthorized) {

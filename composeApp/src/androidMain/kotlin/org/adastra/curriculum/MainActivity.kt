@@ -1,30 +1,49 @@
 package org.adastra.curriculum
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.russhwolf.settings.SharedPreferencesSettings
-import org.adastra.curriculum.auth.TokenManager
-import org.adastra.curriculum.client.BackendApi
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import org.adastra.curriculum.auth.LoginScreen
+import org.adastra.curriculum.auth.LoginViewModel
 
 class MainActivity : ComponentActivity() {
+    private lateinit var loginViewModel: LoginViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val baseUrl = BuildConfig.BASE_URL
-        val sharedPreferences: SharedPreferences = getSharedPreferences("curriculum_preferences",
-            MODE_PRIVATE
-        )
+        loginViewModel = ViewModelProvider(this)[LoginViewModel::class.java]
+        loginViewModel.logout()
+        // Observe the token validity LiveData
+        loginViewModel.isLoggedIn().observe(this, Observer { isLoggedIn ->
+            if (isLoggedIn) {
+                // If the token is valid, show the main content
+                showMainContent()
+            } else {
+                // If the token is invalid, redirect to the login screen
+                redirectToLogin()
+            }
+        })
 
-        val settings = SharedPreferencesSettings(sharedPreferences)
-        val tokenManager = TokenManager(settings)
-        tokenManager.clearToken()
-        val backendApi = BackendApi(baseUrl, tokenManager)
+        // Check the token status when the app starts
+        loginViewModel.checkToken()
+    }
+
+    private fun showMainContent() {
+        // Display main content view (your app's main UI)
         setContent {
             App()
+        }
+    }
+
+    private fun redirectToLogin() {
+        // Redirect to the login screen if not logged in
+        setContent {
+            LoginScreen(loginViewModel)
         }
     }
 }
