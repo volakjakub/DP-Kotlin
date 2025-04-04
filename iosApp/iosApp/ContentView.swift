@@ -2,6 +2,7 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
+    let backendApi: BackendApi
     @State private var showContent = false
     var body: some View {
         VStack {
@@ -23,11 +24,5 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding()
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
     }
 }
