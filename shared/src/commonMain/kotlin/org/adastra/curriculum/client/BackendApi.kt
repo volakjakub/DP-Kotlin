@@ -17,11 +17,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import org.adastra.curriculum.auth.TokenManager
 import org.adastra.curriculum.client.data.LoginRequest
 import org.adastra.curriculum.client.data.LoginResponse
 
-class BackendApi(val baseUrl: String, private val tokenManager: TokenManager) {
+class BackendApi(val baseUrl: String) {
     private val client = HttpClient {
         install(ContentNegotiation) {
             json(Json {
@@ -42,7 +41,7 @@ class BackendApi(val baseUrl: String, private val tokenManager: TokenManager) {
         }
     }
 
-    suspend fun login(loginRequest: LoginRequest): Boolean {
+    suspend fun login(loginRequest: LoginRequest): String? {
         return try {
             val response: HttpResponse = client.post("$baseUrl/authenticate") {
                 setBody(loginRequest)
@@ -50,23 +49,19 @@ class BackendApi(val baseUrl: String, private val tokenManager: TokenManager) {
 
             if (response.status == HttpStatusCode.Unauthorized) {
                 println("Login failed: Invalid credentials (401). Please try again.")
-                tokenManager.clearToken()
-                return false
+                return null
             }
 
             if (response.status == HttpStatusCode.OK) {
                 val loginResponse: LoginResponse = response.body()
-                tokenManager.saveToken(loginResponse.id_token)
-                return true
+                return loginResponse.id_token
             } else {
                 println("Login failed. Please try again.")
-                tokenManager.clearToken()
-                return false
+                return null
             }
         } catch (e: Exception) {
             println("Login failed: ${e.message}")
-            tokenManager.clearToken()
-            return false
+            return null
         }
     }
 }

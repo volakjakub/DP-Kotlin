@@ -3,19 +3,22 @@ import Shared
 
 @main
 struct iOSApp: App {
-    let tokenManager: TokenManager
-    let backendApi: BackendApi
+    @StateObject var tokenWrapper: TokenManagerWrapper
 
     init() {
-        let baseUrl: String = "http://localhost:8080/api"
+        let base = "http://192.168.0.101:8080/api"
         let tokenManagerProvider = TokenManagerProvider()
-        self.tokenManager = tokenManagerProvider.createTokenManager()
-        self.tokenManager.clearToken()
-        self.backendApi = BackendApi(baseUrl: baseUrl, tokenManager: self.tokenManager)
+        let tokenManager = tokenManagerProvider.createTokenManager()
+        tokenManager.clearToken()
+        _tokenWrapper = StateObject(wrappedValue: TokenManagerWrapper(tokenManager: tokenManager, backendApi: BackendApi(baseUrl: base)))
     }
     var body: some Scene {
         WindowGroup {
-            ContentView(backendApi: self.backendApi)
+            if tokenWrapper.refresh && tokenWrapper.getToken() != nil {
+                ContentView(backendApi: BackendApi(baseUrl: "http://192.168.0.101:8080/api"))
+            } else {
+                LoginView(tokenManagerWrapper: tokenWrapper)
+            }
         }
     }
 }

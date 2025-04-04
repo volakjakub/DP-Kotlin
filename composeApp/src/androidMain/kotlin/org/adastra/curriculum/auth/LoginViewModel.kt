@@ -14,7 +14,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         context = application.applicationContext
     )
     private val tokenManager = tokenManagerProvider.createTokenManager()
-    private val backendApi = BackendApi(baseUrl, tokenManager)
+    private val backendApi = BackendApi(baseUrl)
 
     // LiveData to manage token validity
     private val _isLoggedIn = MutableLiveData<Boolean>()
@@ -28,7 +28,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     // Handle login
     suspend fun login(loginRequest: LoginRequest): Boolean {
-        if (backendApi.login(loginRequest)) {
+        var token = backendApi.login(loginRequest)
+        if (token != null) {
+            tokenManager.saveToken(token)
             _isLoggedIn.value = true
             return true
         } else {
