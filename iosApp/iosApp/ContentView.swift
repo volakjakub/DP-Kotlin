@@ -2,6 +2,7 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
+    let backendApi: BackendApi
     @State private var showContent = false
     var body: some View {
         VStack {
