@@ -3,8 +3,6 @@ package org.adastra.curriculum
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import org.adastra.curriculum.auth.LoginScreen
@@ -36,7 +34,7 @@ class MainActivity : ComponentActivity() {
     private fun showMainContent() {
         // Display main content view (your app's main UI)
         setContent {
-            App()
+            App(loginViewModel)
         }
     }
 
@@ -46,10 +44,4 @@ class MainActivity : ComponentActivity() {
             LoginScreen(loginViewModel)
         }
     }
-}
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App()
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.adastra.curriculum.BuildConfig
 import org.adastra.curriculum.client.BackendApi
+import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.client.data.LoginRequest
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
@@ -26,13 +27,24 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         _isLoggedIn.value = tokenManager.getToken() != null
     }
 
+    fun getAccount(): AccountResponse? {
+        return tokenManager.getAccount()
+    }
+
     // Handle login
     suspend fun login(loginRequest: LoginRequest): Boolean {
         var token = backendApi.login(loginRequest)
         if (token != null) {
             tokenManager.saveToken(token)
-            _isLoggedIn.value = true
-            return true
+            val account = backendApi.getAccount(token)
+            if (account != null) {
+                tokenManager.saveAccount(account)
+                _isLoggedIn.value = true
+                return true
+            } else {
+                _isLoggedIn.value = false
+                return false
+            }
         } else {
             _isLoggedIn.value = false
             return false
@@ -42,6 +54,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     // Handle logout
     fun logout() {
         tokenManager.clearToken()
+        tokenManager.clearAccount()
         _isLoggedIn.value = false
     }
 }
