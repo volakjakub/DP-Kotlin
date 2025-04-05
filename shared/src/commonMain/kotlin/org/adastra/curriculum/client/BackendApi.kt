@@ -22,6 +22,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.client.data.BiographyResponse
+import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageResponse
 import org.adastra.curriculum.client.data.LoginRequest
 import org.adastra.curriculum.client.data.LoginResponse
@@ -44,6 +45,25 @@ class BackendApi(val baseUrl: String) {
         defaultRequest {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
+        }
+    }
+
+    suspend fun getEducationsByBiography(token: String, biographyId: Int): List<EducationResponse>? {
+        val response: HttpResponse = client.get("$baseUrl/educations/biography?biographyId=$biographyId") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK) {
+            val educations: List<EducationResponse> = response.body()
+            return educations
+        } else {
+            println("Invalid request. Please try again.")
+            return null
         }
     }
 

@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
@@ -39,18 +41,23 @@ import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.service.BiographyService
 import kotlin.time.ExperimentalTime
 import kotlinx.datetime.*
+import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageResponse
+import org.adastra.curriculum.helper.EducationHelper
 import org.adastra.curriculum.helper.ExpertiseHelper
 import org.adastra.curriculum.helper.LanguageHelper
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun App(loginViewModel: LoginViewModel) {
+    val scrollState = rememberScrollState()
     val expertiseHelper = ExpertiseHelper()
     val languageHelper = LanguageHelper()
+    val educationHelper = EducationHelper()
     val biographyService = BiographyService(loginViewModel)
     var isLoadingBiography by remember { mutableStateOf(true) }
     var isLoadingLanguages by remember { mutableStateOf(true) }
+    var isLoadingEducations by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
 
     val biographyState = produceState<BiographyResponse?>(initialValue = null) {
@@ -72,7 +79,7 @@ fun App(loginViewModel: LoginViewModel) {
 
     MaterialTheme {
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.verticalScroll(scrollState).padding(bottom = 80.dp)) {
                 Text(
                     "Curriculum",
                     style = MaterialTheme.typography.h3,
@@ -332,6 +339,106 @@ fun App(loginViewModel: LoginViewModel) {
                                                         }
                                                     }
                                                     if (index < languages.lastIndex) {
+                                                        Divider(
+                                                            color = Color.Gray,
+                                                            thickness = 1.dp,
+                                                            modifier = Modifier.padding(vertical = 5.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        val educationsState =
+                                            produceState<List<EducationResponse>?>(initialValue = null) {
+                                                if (loginViewModel.getAccount()?.authorities?.contains(
+                                                        Authority.ROLE_ADMIN
+                                                    ) == true
+                                                ) {
+                                                    isLoadingEducations = false
+                                                    value = null
+                                                } else {
+                                                    try {
+                                                        value =
+                                                            biographyService.getEducationsByBiography(
+                                                                biography.id
+                                                            )
+                                                    } catch (e: Exception) {
+                                                        error = e.message
+                                                        value = null
+                                                    } finally {
+                                                        isLoadingEducations = false
+                                                    }
+                                                }
+                                            }
+                                        val educations = educationsState.value
+
+                                        Text(
+                                            "Vzdělání",
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.h5,
+                                            textAlign = TextAlign.Left,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(bottom = 10.dp, top = 15.dp)
+                                                .fillMaxWidth()
+                                        )
+
+                                        if (isLoadingEducations) {
+                                            CircularProgressIndicator(
+                                                color = Color.Blue,
+                                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                                            )
+                                        }
+
+                                        when {
+                                            educations != null -> {
+                                                educations.forEachIndexed { index, education ->
+                                                    val start = LocalDate.parse(education.start)
+                                                    val startFormatted = "%02d.%02d.%04d".format(
+                                                        start.dayOfMonth,
+                                                        start.monthNumber,
+                                                        start.year
+                                                    )
+                                                    var endFormatted: String? = null
+                                                    if (education.end != null) {
+                                                        val end = LocalDate.parse(education.end!!)
+                                                        endFormatted = "%02d.%02d.%04d".format(
+                                                            end.dayOfMonth,
+                                                            end.monthNumber,
+                                                            end.year
+                                                        )
+                                                    }
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .background(Color.LightGray)
+                                                            .fillMaxWidth(),
+                                                        contentAlignment = Alignment.BottomCenter
+                                                    ) {
+                                                        Row(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(7.dp),
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.SpaceBetween
+                                                        ) {
+                                                            Column {
+                                                                Text(
+                                                                    education.school,
+                                                                    fontSize = 14.sp,
+                                                                    fontWeight = FontWeight.Bold,
+                                                                    color = Color.Black
+                                                                )
+                                                                Text(
+                                                                    educationHelper.getType(education.type) + " (" + startFormatted + " - " + (endFormatted ?: "-") + ")",
+                                                                    fontSize = 14.sp,
+                                                                    fontWeight = FontWeight.Normal,
+                                                                    color = Color.Black
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                    if (index < educations.lastIndex) {
                                                         Divider(
                                                             color = Color.Gray,
                                                             thickness = 1.dp,
