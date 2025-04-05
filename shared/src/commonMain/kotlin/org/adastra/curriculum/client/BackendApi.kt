@@ -9,14 +9,19 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.accept
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.request
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.client.data.LoginRequest
 import org.adastra.curriculum.client.data.LoginResponse
 
@@ -38,6 +43,30 @@ class BackendApi(val baseUrl: String) {
         defaultRequest {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
+        }
+    }
+
+    suspend fun getAccount(token: String): AccountResponse? {
+        return try {
+            val response: HttpResponse = client.get("$baseUrl/account") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+            }
+
+            if (response.status == HttpStatusCode.Unauthorized) {
+                println("Invalid credentials (401). Please log in.")
+                return null
+            }
+
+            if (response.status == HttpStatusCode.OK) {
+                val account: AccountResponse = response.body()
+                return account
+            } else {
+                println("Invalid request. Please try again.")
+                return null
+            }
+        } catch (e: Exception) {
+            println("Invalid request: ${e.message}")
+            return null
         }
     }
 
