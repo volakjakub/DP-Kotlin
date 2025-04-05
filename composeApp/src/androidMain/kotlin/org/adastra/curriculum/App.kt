@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -38,17 +39,23 @@ import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.service.BiographyService
 import kotlin.time.ExperimentalTime
 import kotlinx.datetime.*
+import org.adastra.curriculum.client.data.LanguageResponse
+import org.adastra.curriculum.helper.ExpertiseHelper
+import org.adastra.curriculum.helper.LanguageHelper
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun App(loginViewModel: LoginViewModel) {
+    val expertiseHelper = ExpertiseHelper()
+    val languageHelper = LanguageHelper()
     val biographyService = BiographyService(loginViewModel)
-    var isLoading by remember { mutableStateOf(true) }
+    var isLoadingBiography by remember { mutableStateOf(true) }
+    var isLoadingLanguages by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
 
     val biographyState = produceState<BiographyResponse?>(initialValue = null) {
         if (loginViewModel.getAccount()?.authorities?.contains(Authority.ROLE_ADMIN) == true) {
-            isLoading = false
+            isLoadingBiography = false
             value = null
         } else {
             try {
@@ -57,188 +64,284 @@ fun App(loginViewModel: LoginViewModel) {
                 error = e.message
                 value = null
             } finally {
-                isLoading = false
+                isLoadingBiography = false
             }
         }
     }
+    val biography = biographyState.value
 
     MaterialTheme {
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Curriculum",
-                style = MaterialTheme.typography.h3,
-                textAlign = TextAlign.Center,
-                color = Color.Black,
-                modifier = Modifier.padding(bottom = 20.dp, top = 30.dp).fillMaxWidth())
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "Curriculum",
+                    style = MaterialTheme.typography.h3,
+                    textAlign = TextAlign.Center,
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 20.dp, top = 30.dp).fillMaxWidth()
+                )
 
-            if (loginViewModel.getAccount()?.authorities?.contains(Authority.ROLE_USER) == true) {
-                Box(
-                    modifier = Modifier
-                        .padding()
-                        .background(Color.White),
-                    contentAlignment = Alignment.TopStart
-                ) {
-                    if (isLoading) {
-                        Column(Modifier.fillMaxWidth().padding(10.dp)) {
-                            CircularProgressIndicator(
-                                color = Color.Blue,
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
-                        }
-                    }
-                    if (error != null) {
-                        Column(Modifier.fillMaxWidth().padding(10.dp)) {
-                            Text(
-                                text = error.toString(),
-                                color = Color.Red,
-                                fontSize = TextUnit(12f, TextUnitType.Sp),
-                                modifier = Modifier.align(Alignment.CenterHorizontally)
-                            )
-                        }
-                    }
+                if (error != null) {
+                    Text(
+                        text = error.toString(),
+                        color = Color.Red,
+                        fontSize = TextUnit(12f, TextUnitType.Sp),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
 
-                    val biography = biographyState.value
-                    when {
-                        biography != null -> {
-                            val employedFrom = LocalDate.parse(biography.employedFrom)
-                            val employedFromFormatted = "%02d.%02d.%04d".format(employedFrom.dayOfMonth, employedFrom.monthNumber, employedFrom.year)
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text(
-                                        "Titul",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        biography.title ?: "",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        "Jméno",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        biography.firstName,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        "Příjmení",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        biography.lastName,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        "E-Mail",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        biography.email,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        "Telefon",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        biography.phone,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
-                                    Divider(
-                                        color = Color.Gray,
-                                        thickness = 1.dp,
-                                        modifier = Modifier.padding(vertical = 8.dp)
-                                    )
-                                    Text(
-                                        "Ulice",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        biography.street,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        "Město",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        biography.city,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        "Stát",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        biography.country,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
-                                    Divider(
-                                        color = Color.Gray,
-                                        thickness = 1.dp,
-                                        modifier = Modifier.padding(vertical = 8.dp)
-                                    )
-                                    Text(
-                                        "Pracovní pozice",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        biography.position,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        "Zaměstnán/a od",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.Black
-                                    )
-                                    Text(
-                                        employedFromFormatted,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = Color.Black
-                                    )
+                if (loginViewModel.getAccount()?.authorities?.contains(Authority.ROLE_USER) == true) {
+                    Box(
+                        modifier = Modifier
+                            .padding()
+                            .background(Color.White),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        if (isLoadingBiography) {
+                            Column(Modifier.fillMaxWidth().padding(10.dp)) {
+                                CircularProgressIndicator(
+                                    color = Color.Blue,
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                )
+                            }
+                        }
+
+                        when {
+                            biography != null -> {
+                                val employedFrom = LocalDate.parse(biography.employedFrom)
+                                val employedFromFormatted = "%02d.%02d.%04d".format(
+                                    employedFrom.dayOfMonth,
+                                    employedFrom.monthNumber,
+                                    employedFrom.year
+                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Column {
+                                        Text(
+                                            "Titul",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            biography.title ?: "",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            "Jméno",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            biography.firstName,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            "Příjmení",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            biography.lastName,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            "E-Mail",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            biography.email,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            "Telefon",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            biography.phone,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Divider(
+                                            color = Color.Gray,
+                                            thickness = 1.dp,
+                                            modifier = Modifier.padding(vertical = 8.dp)
+                                        )
+                                        Text(
+                                            "Ulice",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            biography.street,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            "Město",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            biography.city,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            "Stát",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            biography.country,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Divider(
+                                            color = Color.Gray,
+                                            thickness = 1.dp,
+                                            modifier = Modifier.padding(vertical = 8.dp)
+                                        )
+                                        Text(
+                                            "Pracovní pozice",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            biography.position,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            "Zaměstnán/a od",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.Black
+                                        )
+                                        Text(
+                                            employedFromFormatted,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            color = Color.Black
+                                        )
+
+                                        val languagesState =
+                                            produceState<List<LanguageResponse>?>(initialValue = null) {
+                                                if (loginViewModel.getAccount()?.authorities?.contains(
+                                                        Authority.ROLE_ADMIN
+                                                    ) == true
+                                                ) {
+                                                    isLoadingLanguages = false
+                                                    value = null
+                                                } else {
+                                                    try {
+                                                        value =
+                                                            biographyService.getLanguagesByBiography(
+                                                                biography.id
+                                                            )
+                                                    } catch (e: Exception) {
+                                                        error = e.message
+                                                        value = null
+                                                    } finally {
+                                                        isLoadingLanguages = false
+                                                    }
+                                                }
+                                            }
+                                        val languages = languagesState.value
+
+                                        Text(
+                                            "Jazyky",
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.h5,
+                                            textAlign = TextAlign.Left,
+                                            color = Color.Black,
+                                            modifier = Modifier.padding(bottom = 10.dp, top = 15.dp)
+                                                .fillMaxWidth()
+                                        )
+
+                                        if (isLoadingLanguages) {
+                                            CircularProgressIndicator(
+                                                color = Color.Blue,
+                                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                                            )
+                                        }
+
+                                        when {
+                                            languages != null -> {
+                                                languages.forEachIndexed { index, language ->
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .background(Color.LightGray)
+                                                            .fillMaxWidth(),
+                                                        contentAlignment = Alignment.BottomCenter
+                                                    ) {
+                                                        Row(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(7.dp),
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.SpaceBetween
+                                                        ) {
+                                                            Column {
+                                                                Text(
+                                                                    languageHelper.getLanguage(
+                                                                        language.name
+                                                                    ),
+                                                                    fontSize = 14.sp,
+                                                                    fontWeight = FontWeight.Bold,
+                                                                    color = Color.Black
+                                                                )
+                                                                Text(
+                                                                    expertiseHelper.getExpertise(
+                                                                        language.expertise
+                                                                    ),
+                                                                    fontSize = 14.sp,
+                                                                    fontWeight = FontWeight.Normal,
+                                                                    color = Color.Black
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                    if (index < languages.lastIndex) {
+                                                        Divider(
+                                                            color = Color.Gray,
+                                                            thickness = 1.dp,
+                                                            modifier = Modifier.padding(vertical = 5.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -249,7 +352,8 @@ fun App(loginViewModel: LoginViewModel) {
             Box(
                 modifier = Modifier
                     .height(75.dp)
-                    .background(Color.LightGray),
+                    .background(Color.LightGray)
+                    .align(Alignment.BottomCenter),
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Row(
