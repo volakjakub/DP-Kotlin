@@ -15,7 +15,7 @@ struct iOSApp: App {
     var body: some Scene {
         WindowGroup {
             if tokenWrapper.refresh && tokenWrapper.getToken() != nil {
-                ContentView(backendApi: BackendApi(baseUrl: "http://192.168.0.101:8080/api"))
+                ContentView(tokenWrapper: tokenWrapper, backendApi: BackendApi(baseUrl: "http://192.168.0.101:8080/api"))
             } else {
                 LoginView(tokenManagerWrapper: tokenWrapper)
             }

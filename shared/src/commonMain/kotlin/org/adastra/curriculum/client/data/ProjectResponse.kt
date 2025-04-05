@@ -11,4 +11,8 @@ data class ProjectResponse (
     val end: String?,
     val description: String?,
     val skills: List<ProjectSkillResponse>
-)
+) {
+    fun getDesc(): String? {
+        return description
+    }
+}
