@@ -4,6 +4,7 @@ import org.adastra.curriculum.BuildConfig
 import org.adastra.curriculum.auth.LoginViewModel
 import org.adastra.curriculum.client.BackendApi
 import org.adastra.curriculum.client.data.BiographyResponse
+import org.adastra.curriculum.client.data.LanguageResponse
 
 class BiographyService(loginViewModel: LoginViewModel) {
     private val baseUrl = BuildConfig.BASE_URL
@@ -30,6 +31,27 @@ class BiographyService(loginViewModel: LoginViewModel) {
             throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
         } else {
             return biography
+        }
+    }
+
+    suspend fun getLanguagesByBiography(biographyId: Int): List<LanguageResponse> {
+        var languages: List<LanguageResponse>? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                languages = backendApi.getLanguagesByBiography(token, biographyId)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (languages == null) {
+            throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
+        } else {
+            return languages
         }
     }
 }
