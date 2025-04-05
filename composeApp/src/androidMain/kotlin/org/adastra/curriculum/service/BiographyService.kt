@@ -6,6 +6,8 @@ import org.adastra.curriculum.client.BackendApi
 import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageResponse
+import org.adastra.curriculum.client.data.ProjectResponse
+import org.adastra.curriculum.client.data.SkillResponse
 
 class BiographyService(loginViewModel: LoginViewModel) {
     private val baseUrl = BuildConfig.BASE_URL
@@ -74,6 +76,48 @@ class BiographyService(loginViewModel: LoginViewModel) {
             throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
         } else {
             return educations
+        }
+    }
+
+    suspend fun getProjectsByBiography(biographyId: Int): List<ProjectResponse> {
+        var projects: List<ProjectResponse>? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                projects = backendApi.getProjectsByBiography(token, biographyId)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (projects == null) {
+            throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
+        } else {
+            return projects
+        }
+    }
+
+    suspend fun getSkillsByBiography(biographyId: Int): List<SkillResponse> {
+        var skills: List<SkillResponse>? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                skills = backendApi.getSkillsByBiography(token, biographyId)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (skills == null) {
+            throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
+        } else {
+            return skills
         }
     }
 }

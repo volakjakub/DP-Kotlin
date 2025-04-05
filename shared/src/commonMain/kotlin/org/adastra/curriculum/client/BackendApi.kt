@@ -26,6 +26,8 @@ import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageResponse
 import org.adastra.curriculum.client.data.LoginRequest
 import org.adastra.curriculum.client.data.LoginResponse
+import org.adastra.curriculum.client.data.ProjectResponse
+import org.adastra.curriculum.client.data.SkillResponse
 
 class BackendApi(val baseUrl: String) {
     private val client = HttpClient {
@@ -45,6 +47,44 @@ class BackendApi(val baseUrl: String) {
         defaultRequest {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
+        }
+    }
+
+    suspend fun getSkillsByBiography(token: String, biographyId: Int): List<SkillResponse>? {
+        val response: HttpResponse = client.get("$baseUrl/skills/biography?biographyId=$biographyId") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK) {
+            val skills: List<SkillResponse> = response.body()
+            return skills
+        } else {
+            println("Invalid request. Please try again.")
+            return null
+        }
+    }
+
+    suspend fun getProjectsByBiography(token: String, biographyId: Int): List<ProjectResponse>? {
+        val response: HttpResponse = client.get("$baseUrl/projects/biography?biographyId=$biographyId") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK) {
+            val projects: List<ProjectResponse> = response.body()
+            return projects
+        } else {
+            println("Invalid request. Please try again.")
+            return null
         }
     }
 
