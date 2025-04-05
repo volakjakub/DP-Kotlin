@@ -27,6 +27,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         _isLoggedIn.value = tokenManager.getToken() != null
     }
 
+    fun getToken(): String? {
+        return tokenManager.getToken()
+    }
+
     fun getAccount(): AccountResponse? {
         return tokenManager.getAccount()
     }

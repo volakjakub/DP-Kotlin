@@ -86,13 +86,13 @@ fun LoginScreen(loginViewModel: LoginViewModel) {
                     Text("Přihlásit", color = Color.White)
                 }
 
-                if (isLoading) {
-                    CircularProgressIndicator(color = Color.Blue, modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
+            if (isLoading) {
+                CircularProgressIndicator(color = Color.Blue, modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
 
-                error?.let {
-                    Text(text = it, color = Color.Red, fontSize = TextUnit(12f, TextUnitType.Sp), modifier = Modifier.align(Alignment.CenterHorizontally))
-                }
+            error?.let {
+                Text(text = it, color = Color.Red, fontSize = TextUnit(12f, TextUnitType.Sp), modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
         }
     }
 }
