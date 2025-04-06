@@ -4,10 +4,12 @@ import Shared
 struct ContentView: View {
     @ObservedObject var tokenWrapper: TokenManagerWrapper
     let backendApi: BackendApi
+    let account: AccountResponse?
     let biographyService: BiographyService
 
     init(tokenWrapper: TokenManagerWrapper, backendApi: BackendApi) {
         self.tokenWrapper = tokenWrapper
+        self.account = tokenWrapper.getAccount()
         self.backendApi = backendApi
         self.biographyService = BiographyService(tokenWrapper: tokenWrapper, backendApi: backendApi)
     }
@@ -24,10 +26,12 @@ struct ContentView: View {
                         .padding(.bottom, 20)
                         .frame(maxWidth: .infinity)
 
-                    if tokenWrapper.getAccount()?.authorities.contains(Authority.roleAdmin) == true {
-                        // TODO: Admin view
-                    } else {
-                        BiographyDetailView(biographyService: biographyService)
+                    if (account != nil) {
+                        if tokenWrapper.getAccount()?.authorities.contains(Authority.roleAdmin) == true {
+                            // TODO: Admin view
+                        } else {
+                            BiographyDetailView(biographyService: biographyService, account: account!)
+                        }
                     }
                 }
                 .padding(.bottom, 80) // Space for footer

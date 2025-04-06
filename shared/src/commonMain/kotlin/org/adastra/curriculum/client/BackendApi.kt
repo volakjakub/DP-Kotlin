@@ -31,6 +31,7 @@ import org.adastra.curriculum.client.data.LoginResponse
 import org.adastra.curriculum.client.data.ProjectResponse
 import org.adastra.curriculum.client.data.SkillResponse
 import org.adastra.curriculum.exception.NotFoundException
+import kotlin.coroutines.cancellation.CancellationException
 
 class BackendApi(val baseUrl: String) {
     private val client = HttpClient {
@@ -129,6 +130,7 @@ class BackendApi(val baseUrl: String) {
         }
     }
 
+    @Throws(NotFoundException::class, CancellationException::class)
     suspend fun getBiography(token: String, username: String): BiographyResponse? {
         val response: HttpResponse = client.get("$baseUrl/biographies/user?username=$username") {
             header(HttpHeaders.Authorization, "Bearer $token")
@@ -141,7 +143,7 @@ class BackendApi(val baseUrl: String) {
 
         if (response.status == HttpStatusCode.NotFound) {
             println("Biography not found. Please create one.")
-            throw NotFoundException()
+            return null
         }
 
         if (response.status == HttpStatusCode.OK) {
@@ -149,7 +151,7 @@ class BackendApi(val baseUrl: String) {
             return biography
         } else {
             println("Invalid request. Please try again.")
-            return null
+            throw Exception("Invalid request. Please try again.")
         }
     }
 

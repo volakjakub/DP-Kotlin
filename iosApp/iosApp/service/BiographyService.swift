@@ -34,8 +34,30 @@ class BiographyService {
 
     func getBiography() async throws -> BiographyResponse {
         let (token, username) = try getAuthData()
+        do {
+            let biography = try await backendApi.getBiography(token: token, username: username)
+            if (biography == nil) {
+                throw BiographyServiceError.notFoundError
+            } else {
+                return biography!
+            }
+        } catch is KotlinIllegalStateException {
+            tokenWrapper.logout()
+            throw BiographyServiceError.authError
+        }
+    }
+
+    func createBiography(_ request: BiographyRequest) async throws -> BiographyResponse {
+        let (token, username) = try getAuthData()
         return try await handleRequest {
-            try await backendApi.getBiography(token: token, username: username)
+            try await backendApi.saveBiography(token: token, biographyRequest: request, biographyId: nil)
+        }
+    }
+
+    func updateBiography(_ request: BiographyRequest) async throws -> BiographyResponse {
+        let (token, username) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.saveBiography(token: token, biographyRequest: request, biographyId: request.id!)
         }
     }
 

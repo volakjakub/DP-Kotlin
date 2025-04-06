@@ -29,13 +29,13 @@ class BiographyService(loginViewModel: LoginViewModel) {
             } catch (e: IllegalStateException) {
                 lvm.logout()
                 throw Exception(e.message)
-            } catch (e: NotFoundException) {
-                throw e
+            } catch (_: Exception) {
+                throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
             }
         }
 
         if (biography == null) {
-            throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
+            throw NotFoundException()
         } else {
             return biography
         }
