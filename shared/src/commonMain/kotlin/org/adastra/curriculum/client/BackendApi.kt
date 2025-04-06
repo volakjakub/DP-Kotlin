@@ -12,6 +12,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
@@ -21,6 +22,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.adastra.curriculum.client.data.AccountResponse
+import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageResponse
@@ -129,6 +131,34 @@ class BackendApi(val baseUrl: String) {
     suspend fun getBiography(token: String, username: String): BiographyResponse? {
         val response: HttpResponse = client.get("$baseUrl/biographies/user?username=$username") {
             header(HttpHeaders.Authorization, "Bearer $token")
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK) {
+            val biography: BiographyResponse = response.body()
+            return biography
+        } else {
+            println("Invalid request. Please try again.")
+            return null
+        }
+    }
+
+    suspend fun saveBiography(token: String, biographyRequest: BiographyRequest, biographyId: Int?): BiographyResponse? {
+        var response: HttpResponse
+        if (biographyId == null) {
+            response = client.post("$baseUrl/biographies") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(biographyRequest)
+            }
+        } else {
+            response = client.put("$baseUrl/biographies/$biographyId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(biographyRequest)
+            }
         }
 
         if (response.status == HttpStatusCode.Unauthorized) {

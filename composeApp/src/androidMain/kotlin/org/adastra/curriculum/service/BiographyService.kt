@@ -3,6 +3,7 @@ package org.adastra.curriculum.service
 import org.adastra.curriculum.BuildConfig
 import org.adastra.curriculum.auth.LoginViewModel
 import org.adastra.curriculum.client.BackendApi
+import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageResponse
@@ -24,6 +25,48 @@ class BiographyService(loginViewModel: LoginViewModel) {
         } else {
             try {
                 biography = backendApi.getBiography(token, username)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (biography == null) {
+            throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
+        } else {
+            return biography
+        }
+    }
+
+    suspend fun createBiography(biographyRequest: BiographyRequest): BiographyResponse {
+        var biography: BiographyResponse? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                biography = backendApi.saveBiography(token, biographyRequest, null)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (biography == null) {
+            throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
+        } else {
+            return biography
+        }
+    }
+
+    suspend fun updateBiography(biographyRequest: BiographyRequest): BiographyResponse {
+        var biography: BiographyResponse? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                biography = backendApi.saveBiography(token, biographyRequest, biographyRequest.id)
             } catch (e: IllegalStateException) {
                 lvm.logout()
                 throw Exception(e.message)
