@@ -103,7 +103,7 @@ fun BiographyForm(biographyService: BiographyService, biography: BiographyRespon
             colors = ButtonDefaults.buttonColors(Color.Blue),
             onClick = {
                 val request = BiographyRequest(
-                    id = biography?.id ?: 0,
+                    id = biography?.id,
                     title = title.ifBlank { null },
                     firstName = firstName,
                     lastName = lastName,

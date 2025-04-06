@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BiographyRequest (
-    val id: Int,
+    val id: Int?,
     val title: String?,
     val firstName: String,
     val lastName: String,

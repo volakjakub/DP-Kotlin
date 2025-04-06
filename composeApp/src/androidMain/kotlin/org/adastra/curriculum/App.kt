@@ -1,6 +1,8 @@
 package org.adastra.curriculum
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,7 @@ import org.adastra.curriculum.service.BiographyService
 import org.adastra.curriculum.view.BiographyDetail
 import org.adastra.curriculum.view.Footer
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun App(loginViewModel: LoginViewModel) {
