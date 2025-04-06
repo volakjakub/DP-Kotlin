@@ -104,7 +104,7 @@ fun BiographyForm(biographyService: BiographyService, biography: BiographyRespon
             onClick = {
                 val request = BiographyRequest(
                     id = biography?.id,
-                    title = title.ifBlank { null },
+                    title = title.ifBlank { "" },
                     firstName = firstName,
                     lastName = lastName,
                     phone = phone,

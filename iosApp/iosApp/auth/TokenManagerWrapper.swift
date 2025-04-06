@@ -47,7 +47,6 @@ class TokenManagerWrapper: ObservableObject {
         }
     }
 
-
     func logout() {
         self.refresh = false
         self.tokenManager.clearToken()

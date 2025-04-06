@@ -2,52 +2,82 @@ import SwiftUI
 import Shared
 
 struct BiographyDetailView: View {
-    @State private var biography: BiographyResponse?
-    @State private var error: String?
-    @State private var isLoading = true
-    
+    @State private var isNewUser = false
+    @State private var showForm = false
+    @State private var isLoadingBiography = true
+    @State private var error: String? = nil
+    @State private var biography: BiographyResponse? = nil
+
     let biographyService: BiographyService
-    
-    init(biographyService: BiographyService) {
+    let account: AccountResponse
+
+    init(biographyService: BiographyService, account: AccountResponse) {
         self.biographyService = biographyService
+        self.account = account
     }
-    
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                if let error = error {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .font(.system(size: 12))
-                        .frame(maxWidth: .infinity, alignment: .center)
+        VStack {
+            if let error = error {
+                Text(error)
+                    .foregroundColor(.red)
+                    .font(.system(size: 12))
+                    .multilineTextAlignment(.center)
+                    .padding()
+            }
+            if isLoadingBiography {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                    .padding()
+            }
+            if isNewUser && !showForm {
+                VStack(spacing: 16) {
+                    Text("Ještě nemáte v aplikaci vytvořený životopis. Vytvořte si ho prosím.")
+                        .multilineTextAlignment(.center)
+                        .font(.system(size: 15))
+                        .padding()
+
+                    Button(action: {
+                        showForm = true
+                    }) {
+                        Text("Vytvořit")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(8)
+                    }
                 }
+                .padding()
+            }
+            if showForm {
+                BiographyFormView(
+                    biography: biography,
+                    account: account,
+                    onSubmit: { request in
+                        Task {
+                            await handleFormSubmit(request: request)
+                        }
+                    },
+                    onClose: {
+                        showForm = false
+                    }
+                )
+            }
+            if let bio = biography {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        BiographyInfo(biography: bio)
 
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .blue))
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
-
-                if let bio = biography {
-                    Group {
-                        field(title: "Titul", value: bio.title)
-                        field(title: "Jméno", value: bio.firstName)
-                        field(title: "Příjmení", value: bio.lastName)
-                        field(title: "E-Mail", value: bio.email)
-                        field(title: "Telefon", value: bio.phone)
-
-                        Divider().padding(.vertical, 8)
-
-                        field(title: "Ulice", value: bio.street)
-                        field(title: "Město", value: bio.city)
-                        field(title: "Stát", value: bio.country)
-
-                        Divider().padding(.vertical, 8)
-
-                        field(title: "Pracovní pozice", value: bio.position)
-                        
-                        if let date = formatDate(bio.employedFrom) {
-                            field(title: "Zaměstnán/a od", value: date)
+                        Button(action: {
+                            showForm = true
+                        }) {
+                            Text("Upravit")
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(8)
                         }
 
                         LanguageListView(service: biographyService, biography: bio)
@@ -55,11 +85,10 @@ struct BiographyDetailView: View {
                         ProjectListView(service: biographyService, biography: bio)
                         SkillListView(service: biographyService, biography: bio)
                     }
+                    .padding()
                 }
             }
-            .padding()
         }
-        .background(Color.white)
         .onAppear {
             Task {
                 await loadBiography()
@@ -68,34 +97,40 @@ struct BiographyDetailView: View {
     }
 
     private func loadBiography() async {
+        self.isLoadingBiography = true
         do {
-            biography = try await biographyService.getBiography()
+            self.biography = try await biographyService.getBiography()
+            self.isNewUser = false
+        } catch let error as BiographyServiceError {
+            // Handle specific BiographyServiceError cases
+            switch error {
+            case .notFoundError:
+                print("Handling Not Found exception")
+                self.biography = nil
+                self.isNewUser = true
+            case .loadingError, .authError:
+                self.error = error.localizedDescription
+            }
+        } catch {
+            // Handle any unexpected errors
+            self.error = error.localizedDescription
+        }
+        self.isLoadingBiography = false
+    }
+
+    private func handleFormSubmit(request: BiographyRequest) async {
+        self.isLoadingBiography = true
+        do {
+            if request.id == nil {
+                self.biography = try await biographyService.createBiography(request)
+            } else {
+                self.biography = try await biographyService.updateBiography(request)
+            }
+            self.isNewUser = false
+            self.showForm = false
         } catch {
             self.error = error.localizedDescription
         }
-        isLoading = false
-    }
-
-    @ViewBuilder
-    private func field(title: String, value: String?) -> some View {
-        Text(title)
-            .font(.system(size: 14, weight: .bold))
-            .foregroundColor(.black)
-        Text(value ?? "")
-            .font(.system(size: 14))
-            .foregroundColor(.black)
-    }
-
-    private func formatDate(_ dateString: String) -> String? {
-        let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyy-MM-dd"
-
-        let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "dd.MM.yyyy"
-
-        if let date = inputFormatter.date(from: dateString) {
-            return outputFormatter.string(from: date)
-        }
-        return nil
+        self.isLoadingBiography = false
     }
 }

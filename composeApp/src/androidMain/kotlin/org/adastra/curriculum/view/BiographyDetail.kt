@@ -63,7 +63,7 @@ fun BiographyDetail(biographyService: BiographyService, account: AccountResponse
         coroutineScope.launch {
             try {
                 isLoadingBiography = true
-                biography = if (request.id == 0) {
+                biography = if (request.id == null) {
                     biographyService.createBiography(request)
                 } else {
                     biographyService.updateBiography(request)
