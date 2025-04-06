@@ -25,6 +25,7 @@ kotlin {
             implementation(libs.multiplatform.settings)
             implementation(libs.androidx.material.icons.extended)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.androidx.material3)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

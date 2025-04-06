@@ -29,6 +29,7 @@ import org.adastra.curriculum.view.Footer
 fun App(loginViewModel: LoginViewModel) {
     val scrollState = rememberScrollState()
     val biographyService = BiographyService(loginViewModel)
+    val account = loginViewModel.getAccount()
 
     MaterialTheme {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -41,10 +42,14 @@ fun App(loginViewModel: LoginViewModel) {
                     modifier = Modifier.padding(bottom = 20.dp, top = 30.dp).fillMaxWidth()
                 )
 
-                if (loginViewModel.getAccount()?.authorities?.contains(Authority.ROLE_ADMIN) == true) {
-                    // TODO: Admin view
+                if (account != null) {
+                    if (account.authorities.contains(Authority.ROLE_ADMIN) == true) {
+                        // TODO: Admin view
+                    } else {
+                        BiographyDetail(biographyService, account)
+                    }
                 } else {
-                    BiographyDetail(biographyService)
+                    loginViewModel.logout()
                 }
             }
 
