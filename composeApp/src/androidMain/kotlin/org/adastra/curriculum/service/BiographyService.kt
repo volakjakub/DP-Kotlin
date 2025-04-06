@@ -9,6 +9,7 @@ import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageResponse
 import org.adastra.curriculum.client.data.ProjectResponse
 import org.adastra.curriculum.client.data.SkillResponse
+import org.adastra.curriculum.exception.NotFoundException
 
 class BiographyService(loginViewModel: LoginViewModel) {
     private val baseUrl = BuildConfig.BASE_URL
@@ -28,6 +29,8 @@ class BiographyService(loginViewModel: LoginViewModel) {
             } catch (e: IllegalStateException) {
                 lvm.logout()
                 throw Exception(e.message)
+            } catch (e: NotFoundException) {
+                throw e
             }
         }
 
