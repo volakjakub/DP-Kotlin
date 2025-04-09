@@ -9,6 +9,7 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.accept
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -25,6 +26,7 @@ import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.client.data.EducationResponse
+import org.adastra.curriculum.client.data.LanguageRequest
 import org.adastra.curriculum.client.data.LanguageResponse
 import org.adastra.curriculum.client.data.LoginRequest
 import org.adastra.curriculum.client.data.LoginResponse
@@ -130,7 +132,52 @@ class BackendApi(val baseUrl: String) {
         }
     }
 
-    @Throws(NotFoundException::class, CancellationException::class)
+    suspend fun saveLanguage(token: String, languageRequest: LanguageRequest, languageId: Int?): LanguageResponse? {
+        var response: HttpResponse
+        if (languageId == null) {
+            response = client.post("$baseUrl/languages") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(languageRequest)
+            }
+        } else {
+            response = client.put("$baseUrl/languages/$languageId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(languageRequest)
+            }
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Created) {
+            val language: LanguageResponse = response.body()
+            return language
+        } else {
+            println("Invalid request. Please try again.")
+            return null
+        }
+    }
+
+    suspend fun deleteLanguage(token: String, languageId: Int): Boolean? {
+        var response: HttpResponse = client.delete("$baseUrl/languages/$languageId") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK) {
+            return true
+        } else {
+            println("Invalid request. Please try again.")
+            return false
+        }
+    }
+
     suspend fun getBiography(token: String, username: String): BiographyResponse? {
         val response: HttpResponse = client.get("$baseUrl/biographies/user?username=$username") {
             header(HttpHeaders.Authorization, "Bearer $token")
