@@ -150,7 +150,7 @@ fun BiographyDetail(biographyService: BiographyService, account: AccountResponse
                         Text("Upravit", color = Color.White)
                     }
 
-                    LanguageList(biographyService, bio)
+                    LanguageList(biographyService, bio, account)
                     EducationList(biographyService, bio)
                     ProjectList(biographyService, bio)
                     SkillList(biographyService, bio)

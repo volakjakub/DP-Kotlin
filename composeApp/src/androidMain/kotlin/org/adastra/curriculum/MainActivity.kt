@@ -1,8 +1,10 @@
 package org.adastra.curriculum
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import org.adastra.curriculum.auth.LoginScreen
@@ -11,6 +13,7 @@ import org.adastra.curriculum.auth.LoginViewModel
 class MainActivity : ComponentActivity() {
     private lateinit var loginViewModel: LoginViewModel
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -31,6 +34,7 @@ class MainActivity : ComponentActivity() {
         loginViewModel.checkToken()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun showMainContent() {
         // Display main content view (your app's main UI)
         setContent {
