@@ -32,8 +32,6 @@ import org.adastra.curriculum.client.data.LoginRequest
 import org.adastra.curriculum.client.data.LoginResponse
 import org.adastra.curriculum.client.data.ProjectResponse
 import org.adastra.curriculum.client.data.SkillResponse
-import org.adastra.curriculum.exception.NotFoundException
-import kotlin.coroutines.cancellation.CancellationException
 
 class BackendApi(val baseUrl: String) {
     private val client = HttpClient {
@@ -160,7 +158,7 @@ class BackendApi(val baseUrl: String) {
         }
     }
 
-    suspend fun deleteLanguage(token: String, languageId: Int): Boolean? {
+    suspend fun deleteLanguage(token: String, languageId: Int): Boolean {
         var response: HttpResponse = client.delete("$baseUrl/languages/$languageId") {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
@@ -170,7 +168,7 @@ class BackendApi(val baseUrl: String) {
             throw IllegalStateException("Invalid credentials (401). Please log in.")
         }
 
-        if (response.status == HttpStatusCode.OK) {
+        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.NoContent) {
             return true
         } else {
             println("Invalid request. Please try again.")

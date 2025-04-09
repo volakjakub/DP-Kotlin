@@ -7,5 +7,5 @@ data class LanguageRequest (
     val id: Int?,
     val name: String,
     val expertise: Int,
-    val biography: BiographyRequest
+    var biography: BiographyRequest?
 )
