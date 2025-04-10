@@ -25,6 +25,7 @@ import kotlinx.serialization.json.Json
 import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.BiographyResponse
+import org.adastra.curriculum.client.data.EducationRequest
 import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageRequest
 import org.adastra.curriculum.client.data.LanguageResponse
@@ -160,6 +161,52 @@ class BackendApi(val baseUrl: String) {
 
     suspend fun deleteLanguage(token: String, languageId: Int): Boolean {
         var response: HttpResponse = client.delete("$baseUrl/languages/$languageId") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.NoContent) {
+            return true
+        } else {
+            println("Invalid request. Please try again.")
+            return false
+        }
+    }
+
+    suspend fun saveEducation(token: String, educationRequest: EducationRequest, educationId: Int?): EducationResponse? {
+        var response: HttpResponse
+        if (educationId == null) {
+            response = client.post("$baseUrl/educations") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(educationRequest)
+            }
+        } else {
+            response = client.put("$baseUrl/educations/$educationId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(educationRequest)
+            }
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Created) {
+            val education: EducationResponse = response.body()
+            return education
+        } else {
+            println("Invalid request. Please try again.")
+            return null
+        }
+    }
+
+    suspend fun deleteEducation(token: String, educationId: Int): Boolean {
+        var response: HttpResponse = client.delete("$baseUrl/educations/$educationId") {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
 
