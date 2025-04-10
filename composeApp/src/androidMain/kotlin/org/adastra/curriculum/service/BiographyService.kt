@@ -5,6 +5,7 @@ import org.adastra.curriculum.auth.LoginViewModel
 import org.adastra.curriculum.client.BackendApi
 import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.BiographyResponse
+import org.adastra.curriculum.client.data.EducationRequest
 import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageRequest
 import org.adastra.curriculum.client.data.LanguageResponse
@@ -179,6 +180,62 @@ class BiographyService(loginViewModel: LoginViewModel) {
             throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
         } else {
             return educations
+        }
+    }
+
+    suspend fun createEducation(educationRequest: EducationRequest): EducationResponse {
+        var education: EducationResponse? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                education = backendApi.saveEducation(token, educationRequest, null)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (education == null) {
+            throw Exception("Chyba při ukládání dat. Zkontrolujte prosím zadané údaje.")
+        } else {
+            return education
+        }
+    }
+
+    suspend fun updateEducation(educationRequest: EducationRequest): EducationResponse {
+        var education: EducationResponse? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                education = backendApi.saveEducation(token, educationRequest, educationRequest.id)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (education == null) {
+            throw Exception("Chyba při ukládání dat. Zkontrolujte prosím zadané údaje.")
+        } else {
+            return education
+        }
+    }
+
+    suspend fun deleteEducation(educationId: Int): Boolean {
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                return backendApi.deleteEducation(token, educationId)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
         }
     }
 
