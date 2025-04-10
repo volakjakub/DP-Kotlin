@@ -1,29 +1,26 @@
 package org.adastra.curriculum.client.wrapper
 
-import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.LanguageRequest
 
 class LanguageRequestWrapper {
     fun createLanguageRequest(
         name: String,
-        expertise: Int,
-        biography: BiographyRequest
+        expertise: Int
     ): LanguageRequest = LanguageRequest(
         null,
         name,
         expertise,
-        biography
+        null
     )
 
     fun updateLanguageRequest(
         id: Int,
         name: String,
-        expertise: Int,
-        biography: BiographyRequest
+        expertise: Int
     ): LanguageRequest = LanguageRequest(
         id,
         name,
         expertise,
-        biography
+        null
     )
 }

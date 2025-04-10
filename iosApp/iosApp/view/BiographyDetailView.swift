@@ -2,19 +2,14 @@ import SwiftUI
 import Shared
 
 struct BiographyDetailView: View {
+    let biographyService: BiographyService
+    let account: AccountResponse
+    
     @State private var isNewUser = false
     @State private var showForm = false
     @State private var isLoadingBiography = true
     @State private var error: String? = nil
     @State private var biography: BiographyResponse? = nil
-
-    let biographyService: BiographyService
-    let account: AccountResponse
-
-    init(biographyService: BiographyService, account: AccountResponse) {
-        self.biographyService = biographyService
-        self.account = account
-    }
 
     var body: some View {
         VStack {
@@ -50,20 +45,7 @@ struct BiographyDetailView: View {
                 }
                 .padding()
             }
-            if showForm {
-                BiographyFormView(
-                    biography: biography,
-                    account: account,
-                    onSubmit: { request in
-                        Task {
-                            await handleFormSubmit(request: request)
-                        }
-                    },
-                    onClose: {
-                        showForm = false
-                    }
-                )
-            }
+            
             if let bio = biography {
                 ScrollView {
                     VStack(spacing: 16) {
@@ -80,12 +62,26 @@ struct BiographyDetailView: View {
                                 .cornerRadius(8)
                         }
 
-                        LanguageListView(service: biographyService, biography: bio)
+                        LanguageListView(biographyService: biographyService, biography: bio, account: account)
                         EducationListView(service: biographyService, biography: bio)
                         ProjectListView(service: biographyService, biography: bio)
                         SkillListView(service: biographyService, biography: bio)
                     }
                     .padding()
+                    .sheet(isPresented: $showForm) {
+                        BiographyFormView(
+                            biography: biography,
+                            account: account,
+                            onSubmit: { request in
+                                Task {
+                                    await handleFormSubmit(request: request)
+                                }
+                            },
+                            onClose: {
+                                showForm = false
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -105,7 +101,6 @@ struct BiographyDetailView: View {
             // Handle specific BiographyServiceError cases
             switch error {
             case .notFoundError:
-                print("Handling Not Found exception")
                 self.biography = nil
                 self.isNewUser = true
             case .loadingError, .authError:

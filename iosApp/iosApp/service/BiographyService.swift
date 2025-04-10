@@ -67,6 +67,27 @@ class BiographyService {
             try await backendApi.getLanguagesByBiography(token: token, biographyId: Int32(biographyId))
         }
     }
+    
+    func createLanguage(request: LanguageRequest) async throws -> LanguageResponse {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.saveLanguage(token: token, languageRequest: request, languageId: nil)
+        }
+    }
+
+    func updateLanguage(request: LanguageRequest) async throws -> LanguageResponse {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.saveLanguage(token: token, languageRequest: request, languageId: request.id)
+        }
+    }
+
+    func deleteLanguage(languageId: Int) async throws -> Bool {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.deleteLanguage(token: token, languageId: Int32(languageId)).boolValue
+        }
+    }
 
     func getEducationsByBiography(biographyId: Int) async throws -> [EducationResponse] {
         let (token, _) = try getAuthData()
