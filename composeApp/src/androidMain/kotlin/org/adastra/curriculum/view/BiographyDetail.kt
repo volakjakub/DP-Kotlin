@@ -152,7 +152,7 @@ fun BiographyDetail(biographyService: BiographyService, account: AccountResponse
 
                     LanguageList(biographyService, bio, account)
                     EducationList(biographyService, bio, account)
-                    ProjectList(biographyService, bio)
+                    ProjectList(biographyService, bio, account)
                     SkillList(biographyService, bio, account)
                 }
             }

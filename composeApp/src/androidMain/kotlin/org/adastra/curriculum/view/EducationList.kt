@@ -47,7 +47,6 @@ fun EducationList(biographyService: BiographyService, biography: BiographyRespon
     var educationEdit by remember { mutableStateOf<EducationResponse?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    // Load biography once on first composition
     LaunchedEffect(Unit) {
         try {
             isLoadingEducations = true

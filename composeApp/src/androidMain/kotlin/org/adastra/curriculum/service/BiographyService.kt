@@ -9,6 +9,7 @@ import org.adastra.curriculum.client.data.EducationRequest
 import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageRequest
 import org.adastra.curriculum.client.data.LanguageResponse
+import org.adastra.curriculum.client.data.ProjectRequest
 import org.adastra.curriculum.client.data.ProjectResponse
 import org.adastra.curriculum.client.data.SkillRequest
 import org.adastra.curriculum.client.data.SkillResponse
@@ -258,6 +259,62 @@ class BiographyService(loginViewModel: LoginViewModel) {
             throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
         } else {
             return projects
+        }
+    }
+
+    suspend fun createProject(projectRequest: ProjectRequest): ProjectResponse {
+        var project: ProjectResponse? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                project = backendApi.saveProject(token, projectRequest, null)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (project == null) {
+            throw Exception("Chyba při ukládání dat. Zkontrolujte prosím zadané údaje.")
+        } else {
+            return project
+        }
+    }
+
+    suspend fun updateProject(projectRequest: ProjectRequest): ProjectResponse {
+        var project: ProjectResponse? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                project = backendApi.saveProject(token, projectRequest, projectRequest.id)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (project == null) {
+            throw Exception("Chyba při ukládání dat. Zkontrolujte prosím zadané údaje.")
+        } else {
+            return project
+        }
+    }
+
+    suspend fun deleteProject(projectId: Int): Boolean {
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                return backendApi.deleteProject(token, projectId)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
         }
     }
 
