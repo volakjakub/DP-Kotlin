@@ -63,7 +63,7 @@ struct BiographyDetailView: View {
                         }
 
                         LanguageListView(biographyService: biographyService, biography: bio, account: account)
-                        EducationListView(service: biographyService, biography: bio)
+                        EducationListView(biographyService: biographyService, biography: bio, account: account)
                         ProjectListView(service: biographyService, biography: bio)
                         SkillListView(service: biographyService, biography: bio)
                     }

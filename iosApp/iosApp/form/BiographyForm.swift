@@ -2,14 +2,6 @@ import Foundation
 import SwiftUI
 import Shared
 
-extension Date {
-    func toBackendFormat() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: self)
-    }
-}
-
 struct BiographyFormView: View {
     let biography: BiographyResponse?
     let account: AccountResponse
@@ -79,7 +71,7 @@ struct BiographyFormView: View {
         VStack(alignment: .leading) {
             Text("Zaměstnán/a od: \(formatDate(employedFrom))")
             Button("Vybrat datum") {
-                showDatePicker = true
+                showDatePicker = !showDatePicker
             }
             .frame(maxWidth: .infinity)
             .padding()
@@ -155,19 +147,5 @@ struct BiographyFormView: View {
         country = bio.country
         position = bio.position
         employedFrom = parseDate(from: bio.employedFrom)
-    }
-
-    private func parseDate(from string: String?) -> Date? {
-        guard let string = string else { return nil }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.date(from: string)
-    }
-
-    private func formatDate(_ date: Date?) -> String {
-        guard let date = date else { return "-" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy"
-        return formatter.string(from: date)
     }
 }
