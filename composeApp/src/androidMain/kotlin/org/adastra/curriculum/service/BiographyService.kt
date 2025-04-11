@@ -10,6 +10,7 @@ import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.client.data.LanguageRequest
 import org.adastra.curriculum.client.data.LanguageResponse
 import org.adastra.curriculum.client.data.ProjectResponse
+import org.adastra.curriculum.client.data.SkillRequest
 import org.adastra.curriculum.client.data.SkillResponse
 import org.adastra.curriculum.exception.NotFoundException
 
@@ -278,6 +279,62 @@ class BiographyService(loginViewModel: LoginViewModel) {
             throw Exception("Chyba při načítání dat. Zkuste to prosím později.")
         } else {
             return skills
+        }
+    }
+
+    suspend fun createSkill(skillRequest: SkillRequest): SkillResponse {
+        var skill: SkillResponse? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                skill = backendApi.saveSkill(token, skillRequest, null)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (skill == null) {
+            throw Exception("Chyba při ukládání dat. Zkontrolujte prosím zadané údaje.")
+        } else {
+            return skill
+        }
+    }
+
+    suspend fun updateSkill(skillRequest: SkillRequest): SkillResponse {
+        var skill: SkillResponse? = null
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                skill = backendApi.saveSkill(token, skillRequest, skillRequest.id)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
+        }
+
+        if (skill == null) {
+            throw Exception("Chyba při ukládání dat. Zkontrolujte prosím zadané údaje.")
+        } else {
+            return skill
+        }
+    }
+
+    suspend fun deleteSkill(skillId: Int): Boolean {
+        if (token == null || username == null) {
+            lvm.logout()
+            throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
+        } else {
+            try {
+                return backendApi.deleteSkill(token, skillId)
+            } catch (e: IllegalStateException) {
+                lvm.logout()
+                throw Exception(e.message)
+            }
         }
     }
 }

@@ -44,7 +44,6 @@ fun LanguageList(biographyService: BiographyService, biography: BiographyRespons
     var languageEdit by remember { mutableStateOf<LanguageResponse?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    // Load biography once on first composition
     LaunchedEffect(Unit) {
         try {
             isLoadingLanguages = true
@@ -179,8 +178,6 @@ fun LanguageList(biographyService: BiographyService, biography: BiographyRespons
             )
         }
     }
-
-
 
     when {
         languages.isNotEmpty() -> {
