@@ -32,6 +32,7 @@ import org.adastra.curriculum.client.data.LanguageResponse
 import org.adastra.curriculum.client.data.LoginRequest
 import org.adastra.curriculum.client.data.LoginResponse
 import org.adastra.curriculum.client.data.ProjectResponse
+import org.adastra.curriculum.client.data.SkillRequest
 import org.adastra.curriculum.client.data.SkillResponse
 
 class BackendApi(val baseUrl: String) {
@@ -207,6 +208,52 @@ class BackendApi(val baseUrl: String) {
 
     suspend fun deleteEducation(token: String, educationId: Int): Boolean {
         var response: HttpResponse = client.delete("$baseUrl/educations/$educationId") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.NoContent) {
+            return true
+        } else {
+            println("Invalid request. Please try again.")
+            return false
+        }
+    }
+
+    suspend fun saveSkill(token: String, skillRequest: SkillRequest, skillId: Int?): SkillResponse? {
+        var response: HttpResponse
+        if (skillId == null) {
+            response = client.post("$baseUrl/skills") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(skillRequest)
+            }
+        } else {
+            response = client.put("$baseUrl/skills/$skillId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(skillRequest)
+            }
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Created) {
+            val skill: SkillResponse = response.body()
+            return skill
+        } else {
+            println("Invalid request. Please try again.")
+            return null
+        }
+    }
+
+    suspend fun deleteSkill(token: String, skillId: Int): Boolean {
+        var response: HttpResponse = client.delete("$baseUrl/skills/$skillId") {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
 
