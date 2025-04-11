@@ -113,13 +113,15 @@ fun SkillBox(skill: SkillResponse, onShowForm: (SkillResponse) -> Unit, onDelete
                                 color = Color.White,
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            colors = ButtonDefaults.buttonColors(Color.Red),
-                            onClick = {
-                                showDeleteMessage = true
-                            }) {
-                            Text("Odstranit")
+                        if (skill.projects.isEmpty()) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                colors = ButtonDefaults.buttonColors(Color.Red),
+                                onClick = {
+                                    showDeleteMessage = true
+                                }) {
+                                Text("Odstranit")
+                            }
                         }
                     }
                 }
