@@ -10,7 +10,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,48 +29,31 @@ import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.client.data.BiographyUserRequest
-import org.adastra.curriculum.client.data.LanguageRequest
-import org.adastra.curriculum.client.data.LanguageResponse
 import org.adastra.curriculum.client.data.SkillRequest
 import org.adastra.curriculum.client.data.SkillResponse
-import org.adastra.curriculum.form.LanguageFormDialog
 import org.adastra.curriculum.form.SkillFormDialog
 import org.adastra.curriculum.service.BiographyService
 
 @Composable
-fun SkillList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse) {
-    var isLoadingSkills by remember { mutableStateOf(true) }
+fun SkillList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse, skills: List<SkillResponse>, updateSkills: (List<SkillResponse>) -> Unit) {
+    var isLoadingSkills by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var showSkillForm by remember { mutableStateOf(false) }
-    var skills by remember { mutableStateOf<List<SkillResponse>>(emptyList()) }
     var skillEdit by remember { mutableStateOf<SkillResponse?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        try {
-            isLoadingSkills = true
-            skills = biographyService.getSkillsByBiography(
-                biography.id
-            )
-        } catch (e: Exception) {
-            error = e.message
-        } finally {
-            isLoadingSkills = false
-        }
-    }
-
     fun createSkill(created: SkillResponse) {
-        skills = skills + created
+        updateSkills(skills + created)
     }
 
     fun updateSkill(updated: SkillResponse) {
-        skills = skills.map { skill ->
+        updateSkills(skills.map { skill ->
             if (skill.id == updated.id) updated else skill
-        }
+        })
     }
 
     fun removeSkill(skill: SkillResponse) {
-        skills = skills.filterNot { it.id == skill.id }
+        updateSkills(skills.filterNot { it.id == skill.id })
     }
 
     val onShowForm: (SkillResponse) -> Unit = { skill ->

@@ -7,10 +7,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
@@ -23,9 +27,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -33,6 +39,8 @@ import androidx.compose.ui.window.Dialog
 import kotlinx.datetime.LocalDate
 import org.adastra.curriculum.client.data.ProjectRequest
 import org.adastra.curriculum.client.data.ProjectResponse
+import org.adastra.curriculum.client.data.ProjectSkillRequest
+import org.adastra.curriculum.client.data.SkillResponse
 import java.time.Instant
 import java.time.ZoneId
 
@@ -43,8 +51,10 @@ fun ProjectFormDialog(
     isVisible: Boolean,
     onDismiss: () -> Unit,
     onSubmit: (ProjectRequest) -> Unit,
-    existingProject: ProjectResponse? = null
+    existingProject: ProjectResponse? = null,
+    skills: List<SkillResponse>
 ) {
+    val scrollState = rememberScrollState()
     val openStartDatePicker = remember { mutableStateOf(false) }
     val openEndDatePicker = remember { mutableStateOf(false) }
     val starDatePickerState = rememberDatePickerState()
@@ -57,12 +67,19 @@ fun ProjectFormDialog(
                 modifier = Modifier.padding(5.dp),
                 color = MaterialTheme.colors.background
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.verticalScroll(scrollState).padding(16.dp)) {
                     var selectedName by remember { mutableStateOf(existingProject?.name ?: "") }
                     var selectedClient by remember { mutableStateOf(existingProject?.client ?: "") }
                     var selectedDescription by remember { mutableStateOf(existingProject?.description ?: "") }
                     var selectedStart by remember { mutableStateOf(existingProject?.start ?: "") }
                     var selectedEnd by remember { mutableStateOf(existingProject?.end ?: "") }
+                    val selectedSkills = remember {
+                        mutableStateMapOf<Int, Boolean>().apply {
+                            skills.forEach { skill ->
+                                this[skill.id] = existingProject?.skills?.any { it.id == skill.id } == true
+                            }
+                        }
+                    }
 
                     OutlinedTextField(modifier = Modifier.fillMaxWidth(), value = selectedName, onValueChange = { selectedName = it }, label = { Text("Název projektu:") })
                     OutlinedTextField(modifier = Modifier.fillMaxWidth(), value = selectedClient, onValueChange = { selectedClient = it }, label = { Text("Klient:") })
@@ -158,6 +175,25 @@ fun ProjectFormDialog(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Dovednosti:",
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                    )
+                    skills.forEach { skill ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        ) {
+                            Checkbox(
+                                checked = selectedSkills[skill.id] == true,
+                                onCheckedChange = { checked ->
+                                    selectedSkills[skill.id] = checked
+                                }
+                            )
+                            Text(skill.name, modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -178,7 +214,7 @@ fun ProjectFormDialog(
                                         start = selectedStart,
                                         end = endDate,
                                         description = selectedDescription,
-                                        skills = emptyList(),
+                                        skills = skills.filter { selectedSkills[it.id] == true }.map { skill -> ProjectSkillRequest(id = skill.id) },
                                         biography = null
                                     )
                                     onSubmit(projectRequest)

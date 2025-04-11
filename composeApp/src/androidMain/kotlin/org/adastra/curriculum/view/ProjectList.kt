@@ -1,5 +1,7 @@
 package org.adastra.curriculum.view
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,11 +34,13 @@ import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.client.data.BiographyUserRequest
 import org.adastra.curriculum.client.data.ProjectRequest
 import org.adastra.curriculum.client.data.ProjectResponse
+import org.adastra.curriculum.client.data.SkillResponse
 import org.adastra.curriculum.form.ProjectFormDialog
 import org.adastra.curriculum.service.BiographyService
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ProjectList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse) {
+fun ProjectList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse, skills: List<SkillResponse>, updateSkills: (List<SkillResponse>) -> Unit) {
     var isLoadingProjects by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var showProjectForm by remember { mutableStateOf(false) }
@@ -94,7 +98,7 @@ fun ProjectList(biographyService: BiographyService, biography: BiographyResponse
     }
 
     val onFormSubmit: (ProjectRequest) -> Unit = { request ->
-        val biography = BiographyRequest(
+        val bio = BiographyRequest(
             id = biography.id,
             title = biography.title ?: "",
             firstName = biography.firstName,
@@ -111,7 +115,7 @@ fun ProjectList(biographyService: BiographyService, biography: BiographyResponse
                 login = account.login
             )
         )
-        request.biography = biography
+        request.biography = bio
         coroutineScope.launch {
             try {
                 isLoadingProjects = true
@@ -124,6 +128,14 @@ fun ProjectList(biographyService: BiographyService, biography: BiographyResponse
                 error = e.message
             } finally {
                 isLoadingProjects = false
+            }
+
+            try {
+                updateSkills(biographyService.getSkillsByBiography(
+                    biography.id
+                ))
+            } catch (e: Exception) {
+                error = e.message
             }
         }
     }
@@ -155,7 +167,8 @@ fun ProjectList(biographyService: BiographyService, biography: BiographyResponse
             isVisible = showProjectForm,
             onDismiss = { showProjectForm = false },
             onSubmit = onFormSubmit,
-            existingProject = projectEdit
+            existingProject = projectEdit,
+            skills = skills
         )
     }
 

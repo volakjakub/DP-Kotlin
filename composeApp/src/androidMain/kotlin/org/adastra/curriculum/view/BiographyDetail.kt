@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.BiographyResponse
+import org.adastra.curriculum.client.data.SkillResponse
 import org.adastra.curriculum.exception.NotFoundException
 import org.adastra.curriculum.form.BiographyForm
 import org.adastra.curriculum.service.BiographyService
@@ -41,15 +42,22 @@ fun BiographyDetail(biographyService: BiographyService, account: AccountResponse
     var isLoadingBiography by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var biography by remember { mutableStateOf<BiographyResponse?>(null) }
+    var skills by remember { mutableStateOf<List<SkillResponse>>(emptyList()) }
 
     val coroutineScope = rememberCoroutineScope()
 
-    // Load biography once on first composition
+    // Load biography and skills once on first composition
     LaunchedEffect(Unit) {
         try {
             isLoadingBiography = true
             biography = biographyService.getBiography()
-        } catch (e: NotFoundException) {
+
+            biography?.let {
+                skills = biographyService.getSkillsByBiography(
+                    it.id
+                )
+            }
+        } catch (_: NotFoundException) {
             biography = null
             isNewUser = true
         } catch (e: Exception) {
@@ -80,6 +88,10 @@ fun BiographyDetail(biographyService: BiographyService, account: AccountResponse
 
     val onFormClose: () -> Unit = {
         showForm = false
+    }
+
+    val updateSkills: (List<SkillResponse>) -> Unit = { data ->
+        skills = data
     }
 
     Box(
@@ -152,8 +164,8 @@ fun BiographyDetail(biographyService: BiographyService, account: AccountResponse
 
                     LanguageList(biographyService, bio, account)
                     EducationList(biographyService, bio, account)
-                    ProjectList(biographyService, bio, account)
-                    SkillList(biographyService, bio, account)
+                    ProjectList(biographyService, bio, account, skills, updateSkills)
+                    SkillList(biographyService, bio, account, skills, updateSkills)
                 }
             }
         }
