@@ -95,6 +95,28 @@ class BiographyService {
             try await backendApi.getEducationsByBiography(token: token, biographyId: Int32(biographyId))
         }
     }
+    
+    func createEducation(request: EducationRequest) async throws -> EducationResponse {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.saveEducation(token: token, educationRequest: request, educationId: nil)
+        }
+    }
+
+    func updateEducation(request: EducationRequest) async throws -> EducationResponse {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.saveEducation(token: token, educationRequest: request, educationId: request.id)
+        }
+    }
+
+    func deleteEducation(educationId: Int) async throws -> Bool {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.deleteEducation(token: token, educationId: Int32(educationId)).boolValue
+        }
+    }
+
 
     func getProjectsByBiography(biographyId: Int) async throws -> [ProjectResponse] {
         let (token, _) = try getAuthData()

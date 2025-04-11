@@ -30,6 +30,7 @@
 		8B4AF7F52DA317630031E1BF /* form */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = form; sourceTree = "<group>"; };
 		8B7ABD622DA1DD8400907CBE /* view */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = view; sourceTree = "<group>"; };
 		8B7ABD682DA1DE3100907CBE /* service */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = service; sourceTree = "<group>"; };
+		8BC622102DA90500000C9C22 /* extensions */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = extensions; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +80,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				8BC622102DA90500000C9C22 /* extensions */,
 				8B4AF7F52DA317630031E1BF /* form */,
 				8B7ABD682DA1DE3100907CBE /* service */,
 				8B7ABD622DA1DD8400907CBE /* view */,
@@ -122,6 +124,7 @@
 				8B4AF7F52DA317630031E1BF /* form */,
 				8B7ABD622DA1DD8400907CBE /* view */,
 				8B7ABD682DA1DE3100907CBE /* service */,
+				8BC622102DA90500000C9C22 /* extensions */,
 			);
 			name = iosApp;
 			packageProductDependencies = (

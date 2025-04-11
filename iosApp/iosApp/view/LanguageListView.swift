@@ -46,7 +46,7 @@ struct LanguageListView: View {
 
             if !languages.isEmpty {
                 ForEach(Array(languages.enumerated()), id: \.offset) { index, language in
-                    LanguageBox(language: language, onShowForm: onShowForm, onDeleteSubmit: onDeleteSubmit)
+                    LanguageBox(language: language, languageEdit: $languageEdit, onDeleteSubmit: onDeleteSubmit)
 
                     if index < languages.count - 1 {
                         Divider()
@@ -57,11 +57,18 @@ struct LanguageListView: View {
             }
         }
         .onAppear(perform: loadLanguages)
+        .onChange(of: languageEdit) { newValue in
+            // Automatically open the sheet when an item is set
+            showLanguageForm = newValue != nil
+        }
         .sheet(isPresented: $showLanguageForm) {
             LanguageFormDialog(
                 isVisible: $showLanguageForm,
                 onSubmit: onFormSubmit,
-                onDismiss: { showLanguageForm = false },
+                onDismiss: {
+                    languageEdit = nil
+                    showLanguageForm = false
+                },
                 existingLanguage: languageEdit,
                 languageList: languages
             )
@@ -82,8 +89,10 @@ struct LanguageListView: View {
     }
 
     private func onShowForm(language: LanguageResponse) {
-        languageEdit = language
-        showLanguageForm = true
+        DispatchQueue.main.async {
+            languageEdit = language
+            showLanguageForm = true
+        }
     }
 
     private func onDeleteSubmit(language: LanguageResponse) {
