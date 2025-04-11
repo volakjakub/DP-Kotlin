@@ -11,17 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExposedDropdownMenuBox
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,23 +31,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import kotlinx.datetime.LocalDate
-import org.adastra.curriculum.client.data.Education
-import org.adastra.curriculum.client.data.EducationRequest
-import org.adastra.curriculum.client.data.EducationResponse
-import org.adastra.curriculum.helper.EducationHelper
+import org.adastra.curriculum.client.data.ProjectRequest
+import org.adastra.curriculum.client.data.ProjectResponse
 import java.time.Instant
 import java.time.ZoneId
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun EducationFormDialog(
+fun ProjectFormDialog(
     isVisible: Boolean,
     onDismiss: () -> Unit,
-    onSubmit: (EducationRequest) -> Unit,
-    existingEducation: EducationResponse? = null
+    onSubmit: (ProjectRequest) -> Unit,
+    existingProject: ProjectResponse? = null
 ) {
-    val educationHelper = EducationHelper()
     val openStartDatePicker = remember { mutableStateOf(false) }
     val openEndDatePicker = remember { mutableStateOf(false) }
     val starDatePickerState = rememberDatePickerState()
@@ -66,47 +58,15 @@ fun EducationFormDialog(
                 color = MaterialTheme.colors.background
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    var selectedSchool by remember { mutableStateOf(existingEducation?.school ?: "") }
-                    var selectedType by remember { mutableStateOf(existingEducation?.type ?: "") }
-                    var selectedStart by remember { mutableStateOf(existingEducation?.start ?: "") }
-                    var selectedEnd by remember { mutableStateOf(existingEducation?.end ?: "") }
+                    var selectedName by remember { mutableStateOf(existingProject?.name ?: "") }
+                    var selectedClient by remember { mutableStateOf(existingProject?.client ?: "") }
+                    var selectedDescription by remember { mutableStateOf(existingProject?.description ?: "") }
+                    var selectedStart by remember { mutableStateOf(existingProject?.start ?: "") }
+                    var selectedEnd by remember { mutableStateOf(existingProject?.end ?: "") }
 
-                    var expandedType by remember { mutableStateOf(false) }
-                    val typeOptions = listOf(Education.HIGH_SCHOOL, Education.BACHELOR, Education.MASTER, Education.DOCTORATE)
-
-                    OutlinedTextField(modifier = Modifier.fillMaxWidth(), value = selectedSchool, onValueChange = { selectedSchool = it }, label = { Text("Škola:") })
-                    ExposedDropdownMenuBox(
-                        expanded = expandedType,
-                        onExpandedChange = { expandedType = !expandedType },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        OutlinedTextField(
-                            value = educationHelper.getType(selectedType),
-                            onValueChange = {},
-                            label = { Text("Typ vzdělání") },
-                            readOnly = true,
-                            trailingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = null
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expandedType,
-                            onDismissRequest = { expandedType = false }
-                        ) {
-                            typeOptions.forEach { type ->
-                                DropdownMenuItem(onClick = {
-                                    selectedType = type.displayName
-                                    expandedType = false
-                                }) {
-                                    Text(text = educationHelper.getType(type.displayName))
-                                }
-                            }
-                        }
-                    }
+                    OutlinedTextField(modifier = Modifier.fillMaxWidth(), value = selectedName, onValueChange = { selectedName = it }, label = { Text("Název projektu:") })
+                    OutlinedTextField(modifier = Modifier.fillMaxWidth(), value = selectedClient, onValueChange = { selectedClient = it }, label = { Text("Klient:") })
+                    OutlinedTextField(modifier = Modifier.fillMaxWidth(), value = selectedDescription, onValueChange = { selectedDescription = it }, label = { Text("Popis projektu:") })
 
                     if (selectedStart != "") {
                         val startDate = LocalDate.parse(selectedStart)
@@ -116,12 +76,12 @@ fun EducationFormDialog(
                             startDate.year
                         )
                         Text(
-                            text = "Počátek studia: $startDateFormatted",
+                            text = "Počátek projektu: $startDateFormatted",
                             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                         )
                     } else {
                         Text(
-                            text = "Počátek studia: -",
+                            text = "Počátek projektu: -",
                             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                         )
                     }
@@ -161,12 +121,12 @@ fun EducationFormDialog(
                             endDate.year
                         )
                         Text(
-                            text = "Ukončení studia: $endDateFormatted",
+                            text = "Ukončení projektu: $endDateFormatted",
                             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                         )
                     } else {
                         Text(
-                            text = "Ukončení studia: -",
+                            text = "Ukončení projektu: -",
                             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
                         )
                     }
@@ -203,7 +163,7 @@ fun EducationFormDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        if (selectedSchool != "" && selectedType != "" && selectedStart != "") {
+                        if (selectedName != "" && selectedClient != "" && selectedStart != "") {
                             Button(
                                 colors = ButtonDefaults.buttonColors(Color.Blue),
                                 onClick = {
@@ -211,15 +171,17 @@ fun EducationFormDialog(
                                     if (selectedEnd != "") {
                                         endDate = selectedEnd
                                     }
-                                    val educationRequest = EducationRequest(
-                                        id = existingEducation?.id,
-                                        school = selectedSchool,
-                                        type = selectedType,
+                                    val projectRequest = ProjectRequest(
+                                        id = existingProject?.id,
+                                        name = selectedName,
+                                        client = selectedClient,
                                         start = selectedStart,
                                         end = endDate,
+                                        description = selectedDescription,
+                                        skills = emptyList(),
                                         biography = null
                                     )
-                                    onSubmit(educationRequest)
+                                    onSubmit(projectRequest)
                                     onDismiss()
                                 }) {
                                 Text(
