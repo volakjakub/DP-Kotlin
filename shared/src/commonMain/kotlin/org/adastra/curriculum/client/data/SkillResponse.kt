@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class SkillResponse (
     val id: Int,
     val name: String,
-    val expertise: Int
+    val expertise: Int,
+    val projects: List<SkillProjectResponse>
 )
