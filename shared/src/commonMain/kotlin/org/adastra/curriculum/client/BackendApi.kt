@@ -31,6 +31,7 @@ import org.adastra.curriculum.client.data.LanguageRequest
 import org.adastra.curriculum.client.data.LanguageResponse
 import org.adastra.curriculum.client.data.LoginRequest
 import org.adastra.curriculum.client.data.LoginResponse
+import org.adastra.curriculum.client.data.ProjectRequest
 import org.adastra.curriculum.client.data.ProjectResponse
 import org.adastra.curriculum.client.data.SkillRequest
 import org.adastra.curriculum.client.data.SkillResponse
@@ -254,6 +255,52 @@ class BackendApi(val baseUrl: String) {
 
     suspend fun deleteSkill(token: String, skillId: Int): Boolean {
         var response: HttpResponse = client.delete("$baseUrl/skills/$skillId") {
+            header(HttpHeaders.Authorization, "Bearer $token")
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.NoContent) {
+            return true
+        } else {
+            println("Invalid request. Please try again.")
+            return false
+        }
+    }
+
+    suspend fun saveProject(token: String, projectRequest: ProjectRequest, projectId: Int?): ProjectResponse? {
+        var response: HttpResponse
+        if (projectId == null) {
+            response = client.post("$baseUrl/projects") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(projectRequest)
+            }
+        } else {
+            response = client.put("$baseUrl/projects/$projectId") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody(projectRequest)
+            }
+        }
+
+        if (response.status == HttpStatusCode.Unauthorized) {
+            println("Invalid credentials (401). Please log in.")
+            throw IllegalStateException("Invalid credentials (401). Please log in.")
+        }
+
+        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Created) {
+            val project: ProjectResponse = response.body()
+            return project
+        } else {
+            println("Invalid request. Please try again.")
+            return null
+        }
+    }
+
+    suspend fun deleteProject(token: String, projectId: Int): Boolean {
+        var response: HttpResponse = client.delete("$baseUrl/projects/$projectId") {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
 
