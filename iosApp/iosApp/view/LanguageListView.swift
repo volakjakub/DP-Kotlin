@@ -130,7 +130,7 @@ struct LanguageListView: View {
             user: user
         )
 
-        var mutableRequest = request
+        let mutableRequest = request
         mutableRequest.biography = biographyRequest
 
         isLoadingLanguages = true

@@ -48,14 +48,14 @@ class BiographyService {
     }
 
     func createBiography(_ request: BiographyRequest) async throws -> BiographyResponse {
-        let (token, username) = try getAuthData()
+        let (token, _) = try getAuthData()
         return try await handleRequest {
             try await backendApi.saveBiography(token: token, biographyRequest: request, biographyId: nil)
         }
     }
 
     func updateBiography(_ request: BiographyRequest) async throws -> BiographyResponse {
-        let (token, username) = try getAuthData()
+        let (token, _) = try getAuthData()
         return try await handleRequest {
             try await backendApi.saveBiography(token: token, biographyRequest: request, biographyId: request.id!)
         }
@@ -117,7 +117,6 @@ class BiographyService {
         }
     }
 
-
     func getProjectsByBiography(biographyId: Int) async throws -> [ProjectResponse] {
         let (token, _) = try getAuthData()
         return try await handleRequest {
@@ -129,6 +128,27 @@ class BiographyService {
         let (token, _) = try getAuthData()
         return try await handleRequest {
             try await backendApi.getSkillsByBiography(token: token, biographyId: Int32(biographyId))
+        }
+    }
+    
+    func createSkill(request: SkillRequest) async throws -> SkillResponse {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.saveSkill(token: token, skillRequest: request, skillId: nil)
+        }
+    }
+
+    func updateSkill(request: SkillRequest) async throws -> SkillResponse {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.saveSkill(token: token, skillRequest: request, skillId: request.id)
+        }
+    }
+
+    func deleteSkill(skillId: Int) async throws -> Bool {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.deleteSkill(token: token, skillId: Int32(skillId)).boolValue
         }
     }
 }
