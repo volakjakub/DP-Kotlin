@@ -132,7 +132,7 @@ struct EducationListView: View {
             user: user
         )
 
-        var mutableRequest = request
+        let mutableRequest = request
         mutableRequest.biography = biographyRequest
 
         isLoadingEducations = true

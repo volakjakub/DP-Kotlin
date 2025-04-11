@@ -2,17 +2,15 @@ import SwiftUI
 import Shared
 
 struct SkillListView: View {
-    let service: BiographyService
+    let biographyService: BiographyService
     let biography: BiographyResponse
+    let account: AccountResponse
 
-    @State private var skills: [SkillResponse] = []
-    @State private var isLoading = true
+    @State private var isLoadingSkills = true
     @State private var error: String?
-    
-    init(service: BiographyService, biography: BiographyResponse) {
-        self.service = service
-        self.biography = biography
-    }
+    @State private var showSkillForm = false
+    @State private var skills: [SkillResponse] = []
+    @State private var skillEdit: SkillResponse?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -21,15 +19,27 @@ struct SkillListView: View {
                 .foregroundColor(.black)
                 .padding(.top, 15)
                 .padding(.bottom, 10)
+            
+            Button(action: {
+                skillEdit = nil
+                showSkillForm = true
+            }) {
+                Text("Vytvořit")
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .cornerRadius(8)
+            }
 
             if let error = error {
                 Text(error)
                     .foregroundColor(.red)
-                    .font(.system(size: 12))
+                    .font(.footnote)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
 
-            if isLoading {
+            if isLoadingSkills {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .blue))
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -37,7 +47,7 @@ struct SkillListView: View {
 
             if !skills.isEmpty {
                 ForEach(Array(skills.enumerated()), id: \.offset) { index, skill in
-                    SkillBox(skill: skill)
+                    SkillBox(skill: skill, skillEdit: $skillEdit, onDeleteSubmit: onDeleteSubmit)
 
                     if index < skills.count - 1 {
                         Divider()
@@ -47,19 +57,99 @@ struct SkillListView: View {
                 }
             }
         }
-        .onAppear {
-            Task {
-                await loadSkills()
-            }
+        .onAppear(perform: loadSkills)
+        .onChange(of: skillEdit) { newValue in
+            // Automatically open the sheet when an item is set
+            showSkillForm = newValue != nil
+        }
+        .sheet(isPresented: $showSkillForm) {
+            SkillFormDialog(
+                isVisible: $showSkillForm,
+                onSubmit: onFormSubmit,
+                onDismiss: {
+                    skillEdit = nil
+                    showSkillForm = false
+                },
+                existingSkill: skillEdit,
+                skillList: skills
+            )
         }
     }
 
-    private func loadSkills() async {
-        do {
-            skills = try await service.getSkillsByBiography(biographyId: Int(biography.id))
-        } catch {
-            self.error = error.localizedDescription
+    private func loadSkills() {
+        isLoadingSkills = true
+        Task {
+            do {
+                let loadedSkills = try await biographyService.getSkillsByBiography(biographyId: Int(biography.id))
+                skills = loadedSkills
+            } catch {
+                self.error = error.localizedDescription
+            }
+            isLoadingSkills = false
         }
-        isLoading = false
+    }
+
+    private func onShowForm(skill: SkillResponse) {
+        DispatchQueue.main.async {
+            skillEdit = skill
+            showSkillForm = true
+        }
+    }
+
+    private func onDeleteSubmit(skill: SkillResponse) {
+        isLoadingSkills = true
+        Task {
+            do {
+                let success = try await biographyService.deleteSkill(skillId: Int(skill.id))
+                if success {
+                    skills.removeAll { $0.id == skill.id }
+                } else {
+                    error = "Jazyk se nepodařilo odstranit."
+                }
+            } catch {
+                self.error = error.localizedDescription
+            }
+            isLoadingSkills = false
+        }
+    }
+
+    private func onFormSubmit(request: SkillRequest) {
+        let biographyRequestWrapper: BiographyRequestWrapper = BiographyRequestWrapper()
+        let user = BiographyUserRequest(id: account.id, login: account.login)
+        let biographyRequest = biographyRequestWrapper.updateBiographyRequest(
+            id: biography.id,
+            title: biography.title ?? "",
+            firstName: biography.firstName,
+            lastName: biography.lastName,
+            phone: biography.phone,
+            email: biography.email,
+            street: biography.street,
+            city: biography.city,
+            country: biography.country,
+            position: biography.position,
+            employedFrom: biography.employedFrom,
+            user: user
+        )
+
+        let mutableRequest = request
+        mutableRequest.biography = biographyRequest
+
+        isLoadingSkills = true
+        Task {
+            do {
+                if request.id == nil {
+                    let created = try await biographyService.createSkill(request: mutableRequest)
+                    skills.append(created)
+                } else {
+                    let updated = try await biographyService.updateSkill(request: mutableRequest)
+                    if let index = skills.firstIndex(where: { $0.id == updated.id }) {
+                        skills[index] = updated
+                    }
+                }
+            } catch {
+                self.error = error.localizedDescription
+            }
+            isLoadingSkills = false
+        }
     }
 }
