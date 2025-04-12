@@ -36,7 +36,7 @@ import org.adastra.curriculum.service.BiographyService
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun BiographyDetail(biographyService: BiographyService, account: AccountResponse) {
+fun BiographyDetail(biographyService: BiographyService, account: AccountResponse, canEdit: Boolean) {
     var isNewUser by remember { mutableStateOf(false) }
     var showForm by remember { mutableStateOf(false) }
     var isLoadingBiography by remember { mutableStateOf(true) }
@@ -50,7 +50,7 @@ fun BiographyDetail(biographyService: BiographyService, account: AccountResponse
     LaunchedEffect(Unit) {
         try {
             isLoadingBiography = true
-            biography = biographyService.getBiography()
+            biography = biographyService.getBiography(account)
 
             biography?.let {
                 skills = biographyService.getSkillsByBiography(
@@ -122,7 +122,7 @@ fun BiographyDetail(biographyService: BiographyService, account: AccountResponse
                 }
             }
 
-            isNewUser && !showForm -> {
+            isNewUser && !showForm && canEdit -> {
                 Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
                     Text(
                         text = "Ještě nemáte v aplikaci vytvořený životopis. Vytvořte si ho prosím.",
@@ -154,18 +154,20 @@ fun BiographyDetail(biographyService: BiographyService, account: AccountResponse
                 val bio = biography!!
                 Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
                     BiographyInfo(bio)
-                    Button(
-                        modifier = Modifier.fillMaxWidth().padding(),
-                        colors = ButtonDefaults.buttonColors(Color.Blue),
-                        onClick = { showForm = true }
-                    ) {
-                        Text("Upravit", color = Color.White)
+                    if (canEdit) {
+                        Button(
+                            modifier = Modifier.fillMaxWidth().padding(),
+                            colors = ButtonDefaults.buttonColors(Color.Blue),
+                            onClick = { showForm = true }
+                        ) {
+                            Text("Upravit", color = Color.White)
+                        }
                     }
 
-                    LanguageList(biographyService, bio, account)
-                    EducationList(biographyService, bio, account)
-                    ProjectList(biographyService, bio, account, skills, updateSkills)
-                    SkillList(biographyService, bio, account, skills, updateSkills)
+                    LanguageList(biographyService, bio, account, canEdit)
+                    EducationList(biographyService, bio, account, canEdit)
+                    ProjectList(biographyService, bio, account, skills, updateSkills, canEdit)
+                    SkillList(biographyService, bio, account, skills, updateSkills, canEdit)
                 }
             }
         }

@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.TabRowDefaults.Divider
@@ -29,7 +31,7 @@ import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.client.data.Authority
 
 @Composable
-fun UserBox(account: AccountResponse, onShowForm: (AccountResponse) -> Unit, admin: AccountResponse) {
+fun UserBox(account: AccountResponse, onShowForm: (AccountResponse) -> Unit, onShowBio: (AccountResponse) -> Unit, admin: AccountResponse) {
     var isExpanded by remember { mutableStateOf(false) }
 
     fun translateAuthority(authority: Authority): String {
@@ -108,6 +110,19 @@ fun UserBox(account: AccountResponse, onShowForm: (AccountResponse) -> Unit, adm
                     modifier = Modifier.fillMaxWidth().padding(7.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
+                    if (account.authorities.contains(Authority.ROLE_ADMIN) != true) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(Color.Blue),
+                            onClick = {
+                                onShowBio(account)
+                            }) {
+                            Text(
+                                "Životopis",
+                                color = Color.White,
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
                     if (account.login != admin.login) {
                         Button(
                             colors = ButtonDefaults.buttonColors(Color.Blue),

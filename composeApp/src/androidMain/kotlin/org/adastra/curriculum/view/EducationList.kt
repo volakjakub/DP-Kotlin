@@ -39,7 +39,7 @@ import org.adastra.curriculum.service.BiographyService
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun EducationList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse) {
+fun EducationList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse, canEdit: Boolean) {
     var isLoadingEducations by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var showEducationForm by remember { mutableStateOf(false) }
@@ -141,16 +141,18 @@ fun EducationList(biographyService: BiographyService, biography: BiographyRespon
         modifier = Modifier.padding(bottom = 10.dp, top = 15.dp)
             .fillMaxWidth()
     )
-    Button(
-        colors = ButtonDefaults.buttonColors(Color.Blue),
-        onClick = {
-            educationEdit = null
-            showEducationForm = true
-        }) {
-        Text(
-            "Vytvořit",
-            color = Color.White,
-        )
+    if (canEdit) {
+        Button(
+            colors = ButtonDefaults.buttonColors(Color.Blue),
+            onClick = {
+                educationEdit = null
+                showEducationForm = true
+            }) {
+            Text(
+                "Vytvořit",
+                color = Color.White,
+            )
+        }
     }
 
     if (showEducationForm) {
@@ -186,7 +188,7 @@ fun EducationList(biographyService: BiographyService, biography: BiographyRespon
     when {
         educations.isNotEmpty() -> {
             educations.forEachIndexed { index, education ->
-                EducationBox(education, onShowForm, onDeleteSubmit)
+                EducationBox(education, onShowForm, onDeleteSubmit, canEdit)
                 if (index < educations.lastIndex) {
                     Divider(
                         color = Color.Gray,

@@ -40,7 +40,7 @@ import org.adastra.curriculum.service.BiographyService
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ProjectList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse, skills: List<SkillResponse>, updateSkills: (List<SkillResponse>) -> Unit) {
+fun ProjectList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse, skills: List<SkillResponse>, updateSkills: (List<SkillResponse>) -> Unit, canEdit: Boolean) {
     var isLoadingProjects by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var showProjectForm by remember { mutableStateOf(false) }
@@ -150,16 +150,18 @@ fun ProjectList(biographyService: BiographyService, biography: BiographyResponse
         modifier = Modifier.padding(bottom = 10.dp, top = 15.dp)
             .fillMaxWidth()
     )
-    Button(
-        colors = ButtonDefaults.buttonColors(Color.Blue),
-        onClick = {
-            projectEdit = null
-            showProjectForm = true
-        }) {
-        Text(
-            "Vytvořit",
-            color = Color.White,
-        )
+    if (canEdit) {
+        Button(
+            colors = ButtonDefaults.buttonColors(Color.Blue),
+            onClick = {
+                projectEdit = null
+                showProjectForm = true
+            }) {
+            Text(
+                "Vytvořit",
+                color = Color.White,
+            )
+        }
     }
 
     if (showProjectForm) {
@@ -194,7 +196,7 @@ fun ProjectList(biographyService: BiographyService, biography: BiographyResponse
     when {
         projects.isNotEmpty() -> {
             projects.forEachIndexed { index, project ->
-                AnimatedExpandableProjectBox(project, onShowForm, onDeleteSubmit)
+                AnimatedExpandableProjectBox(project, onShowForm, onDeleteSubmit, canEdit)
                 if (index < projects.lastIndex) {
                     Divider(
                         color = Color.Gray,

@@ -36,7 +36,7 @@ import org.adastra.curriculum.form.LanguageFormDialog
 import org.adastra.curriculum.service.BiographyService
 
 @Composable
-fun LanguageList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse) {
+fun LanguageList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse, canEdit: Boolean) {
     var isLoadingLanguages by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var showLanguageForm by remember { mutableStateOf(false) }
@@ -138,16 +138,18 @@ fun LanguageList(biographyService: BiographyService, biography: BiographyRespons
         modifier = Modifier.padding(bottom = 10.dp, top = 15.dp)
             .fillMaxWidth()
     )
-    Button(
-        colors = ButtonDefaults.buttonColors(Color.Blue),
-        onClick = {
-            languageEdit = null
-            showLanguageForm = true
-        }) {
-        Text(
-            "Vytvořit",
-            color = Color.White,
-        )
+    if (canEdit) {
+        Button(
+            colors = ButtonDefaults.buttonColors(Color.Blue),
+            onClick = {
+                languageEdit = null
+                showLanguageForm = true
+            }) {
+            Text(
+                "Vytvořit",
+                color = Color.White,
+            )
+        }
     }
 
     if (showLanguageForm) {
@@ -182,7 +184,7 @@ fun LanguageList(biographyService: BiographyService, biography: BiographyRespons
     when {
         languages.isNotEmpty() -> {
             languages.forEachIndexed { index, language ->
-                LanguageBox(language, onShowForm, onDeleteSubmit)
+                LanguageBox(language, onShowForm, onDeleteSubmit, canEdit)
                 if (index < languages.lastIndex) {
                     Divider(
                         color = Color.Gray,

@@ -3,6 +3,7 @@ package org.adastra.curriculum.service
 import org.adastra.curriculum.BuildConfig
 import org.adastra.curriculum.auth.LoginViewModel
 import org.adastra.curriculum.client.BackendApi
+import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.client.data.EducationRequest
@@ -22,14 +23,14 @@ class BiographyService(loginViewModel: LoginViewModel) {
     private val token = lvm.getToken()
     private val username = lvm.getAccount()?.login
 
-    suspend fun getBiography(): BiographyResponse {
+    suspend fun getBiography(account: AccountResponse): BiographyResponse {
         var biography: BiographyResponse? = null
         if (token == null || username == null) {
             lvm.logout()
             throw Exception("Chyba při načítání dat. Přihlaste se prosím znovu.")
         } else {
             try {
-                biography = backendApi.getBiography(token, username)
+                biography = backendApi.getBiography(token, account.login)
             } catch (e: IllegalStateException) {
                 lvm.logout()
                 throw Exception(e.message)

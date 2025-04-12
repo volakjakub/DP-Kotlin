@@ -61,11 +61,11 @@ fun App(loginViewModel: LoginViewModel) {
                                 contentAlignment = Alignment.TopStart
                             ) {
                                 Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                                    UserList(userService, account)
+                                    UserList(userService, biographyService, account)
                                 }
                             }
                         } else {
-                            BiographyDetail(biographyService, account)
+                            BiographyDetail(biographyService, account, true)
                         }
                     } else {
                         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {

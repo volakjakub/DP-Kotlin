@@ -5,10 +5,13 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -28,23 +31,28 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.launch
 import org.adastra.curriculum.client.data.AccountRequest
 import org.adastra.curriculum.client.data.AccountResponse
 import org.adastra.curriculum.form.AccountFormDialog
+import org.adastra.curriculum.service.BiographyService
 import org.adastra.curriculum.service.UserService
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun UserList(userService: UserService, admin: AccountResponse) {
+fun UserList(userService: UserService, biographyService: BiographyService, admin: AccountResponse) {
     var page by remember { mutableIntStateOf(0) }
     var size by remember { mutableIntStateOf(5) }
     var canLoadNext by remember { mutableStateOf(true) }
     var isLoadingAccounts by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    var showBio by remember { mutableStateOf(false) }
     var showAccountForm by remember { mutableStateOf(false) }
     var accounts by remember { mutableStateOf<List<AccountResponse>>(emptyList()) }
     var accountEdit by remember { mutableStateOf<AccountResponse?>(null) }
+    var accountBio by remember { mutableStateOf<AccountResponse?>(null) }
+    val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -108,6 +116,36 @@ fun UserList(userService: UserService, admin: AccountResponse) {
         }
     }
 
+    val onShowBio: (AccountResponse) -> Unit = { account ->
+        accountBio = account
+        showBio = true
+    }
+
+    if (showBio && accountBio != null) {
+        Dialog(onDismissRequest = {
+            showBio = false
+        }) {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.padding(5.dp).verticalScroll(scrollState),
+                color = MaterialTheme.colors.background
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(Color.Gray),
+                            onClick = {
+                                showBio = false
+                            }) {
+                            Text("Zavřít")
+                        }
+                    }
+                    BiographyDetail(biographyService, accountBio!!, false)
+                }
+            }
+        }
+    }
+
     Text(
         "Uživatelé",
         fontSize = 20.sp,
@@ -161,7 +199,7 @@ fun UserList(userService: UserService, admin: AccountResponse) {
     when {
         accounts.isNotEmpty() -> {
             accounts.forEachIndexed { index, account ->
-                UserBox(account, onShowForm, admin)
+                UserBox(account, onShowForm, onShowBio, admin)
                 if (index < accounts.lastIndex) {
                     Divider(
                         color = Color.Gray,
