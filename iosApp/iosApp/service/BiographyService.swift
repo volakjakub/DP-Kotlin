@@ -151,4 +151,25 @@ class BiographyService {
             try await backendApi.deleteSkill(token: token, skillId: Int32(skillId)).boolValue
         }
     }
+    
+    func createProject(request: ProjectRequest) async throws -> ProjectResponse {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.saveProject(token: token, projectRequest: request, projectId: nil)
+        }
+    }
+
+    func updateProject(request: ProjectRequest) async throws -> ProjectResponse {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.saveProject(token: token, projectRequest: request, projectId: request.id)
+        }
+    }
+
+    func deleteProject(projectId: Int) async throws -> Bool {
+        let (token, _) = try getAuthData()
+        return try await handleRequest {
+            try await backendApi.deleteProject(token: token, projectId: Int32(projectId)).boolValue
+        }
+    }
 }

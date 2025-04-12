@@ -5,11 +5,12 @@ struct SkillListView: View {
     let biographyService: BiographyService
     let biography: BiographyResponse
     let account: AccountResponse
+    @Binding var skills: [SkillResponse]
+    var updateSkills: ([SkillResponse]) -> Void
 
-    @State private var isLoadingSkills = true
+    @State private var isLoadingSkills = false
     @State private var error: String?
     @State private var showSkillForm = false
-    @State private var skills: [SkillResponse] = []
     @State private var skillEdit: SkillResponse?
 
     var body: some View {
@@ -57,7 +58,6 @@ struct SkillListView: View {
                 }
             }
         }
-        .onAppear(perform: loadSkills)
         .onChange(of: skillEdit) { newValue in
             // Automatically open the sheet when an item is set
             showSkillForm = newValue != nil
@@ -76,19 +76,6 @@ struct SkillListView: View {
         }
     }
 
-    private func loadSkills() {
-        isLoadingSkills = true
-        Task {
-            do {
-                let loadedSkills = try await biographyService.getSkillsByBiography(biographyId: Int(biography.id))
-                skills = loadedSkills
-            } catch {
-                self.error = error.localizedDescription
-            }
-            isLoadingSkills = false
-        }
-    }
-
     private func onShowForm(skill: SkillResponse) {
         DispatchQueue.main.async {
             skillEdit = skill
@@ -103,6 +90,7 @@ struct SkillListView: View {
                 let success = try await biographyService.deleteSkill(skillId: Int(skill.id))
                 if success {
                     skills.removeAll { $0.id == skill.id }
+                    updateSkills(skills)
                 } else {
                     error = "Jazyk se nepodařilo odstranit."
                 }
@@ -140,10 +128,12 @@ struct SkillListView: View {
                 if request.id == nil {
                     let created = try await biographyService.createSkill(request: mutableRequest)
                     skills.append(created)
+                    updateSkills(skills)
                 } else {
                     let updated = try await biographyService.updateSkill(request: mutableRequest)
                     if let index = skills.firstIndex(where: { $0.id == updated.id }) {
                         skills[index] = updated
+                        updateSkills(skills)
                     }
                 }
             } catch {
