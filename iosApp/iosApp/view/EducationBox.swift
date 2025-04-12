@@ -5,6 +5,7 @@ struct EducationBox: View {
     let education: EducationResponse
     @Binding var educationEdit: EducationResponse?
     let onDeleteSubmit: (EducationResponse) -> Void
+    let canEdit: Bool
     // Initialize the helper
     let educationHelper = EducationHelper()
     
@@ -71,28 +72,30 @@ struct EducationBox: View {
                     }
                     .padding(7)
                 } else {
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            educationEdit = education
-                        }) {
-                            Text("Upravit")
-                                .foregroundColor(.white)
+                    if (canEdit) {
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                educationEdit = education
+                            }) {
+                                Text("Upravit")
+                                    .foregroundColor(.white)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.blue)
+
+                            Spacer().frame(width: 8)
+
+                            Button(action: {
+                                showDeleteMessage = true
+                            }) {
+                                Text("Odstranit")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.red)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.blue)
-                        
-                        Spacer().frame(width: 8)
-                        
-                        Button(action: {
-                            showDeleteMessage = true
-                        }) {
-                            Text("Odstranit")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
+                        .padding(7)
                     }
-                    .padding(7)
                 }
             }
         }

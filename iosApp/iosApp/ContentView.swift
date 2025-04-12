@@ -39,7 +39,7 @@ struct ContentView: View {
                                 }
                             }
                         } else {
-                            BiographyDetailView(biographyService: biographyService, account: account!)
+                            BiographyDetailView(biographyService: biographyService, account: account!, canEdit: true)
                         }
                     }
                 }

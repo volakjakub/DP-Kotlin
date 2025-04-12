@@ -4,6 +4,7 @@ import Shared
 struct BiographyDetailView: View {
     let biographyService: BiographyService
     let account: AccountResponse
+    let canEdit: Bool
     
     @State private var isNewUser = false
     @State private var showForm = false
@@ -26,7 +27,7 @@ struct BiographyDetailView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: .blue))
                     .padding()
             }
-            if isNewUser && !showForm {
+            if isNewUser && !showForm && canEdit {
                 VStack(spacing: 16) {
                     Text("Ještě nemáte v aplikaci vytvořený životopis. Vytvořte si ho prosím.")
                         .multilineTextAlignment(.center)
@@ -52,21 +53,23 @@ struct BiographyDetailView: View {
                     VStack(spacing: 16) {
                         BiographyInfo(biography: bio)
 
-                        Button(action: {
-                            showForm = true
-                        }) {
-                            Text("Upravit")
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.blue)
-                                .cornerRadius(8)
+                        if (canEdit) {
+                            Button(action: {
+                                showForm = true
+                            }) {
+                                Text("Upravit")
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .cornerRadius(8)
+                            }
                         }
 
-                        LanguageListView(biographyService: biographyService, biography: bio, account: account)
-                        EducationListView(biographyService: biographyService, biography: bio, account: account)
-                        ProjectListView(biographyService: biographyService, biography: bio, account: account, skills: $skills, updateSkills: updateSkills)
-                        SkillListView(biographyService: biographyService, biography: bio, account: account, skills: $skills, updateSkills: updateSkills)
+                        LanguageListView(biographyService: biographyService, biography: bio, account: account, canEdit: canEdit)
+                        EducationListView(biographyService: biographyService, biography: bio, account: account, canEdit: canEdit)
+                        ProjectListView(biographyService: biographyService, biography: bio, account: account, skills: $skills, updateSkills: updateSkills, canEdit: canEdit)
+                        SkillListView(biographyService: biographyService, biography: bio, account: account, skills: $skills, updateSkills: updateSkills, canEdit: canEdit)
                     }
                     .padding()
                     .sheet(isPresented: $showForm) {

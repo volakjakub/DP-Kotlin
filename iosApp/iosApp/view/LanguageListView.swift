@@ -5,6 +5,7 @@ struct LanguageListView: View {
     let biographyService: BiographyService
     let biography: BiographyResponse
     let account: AccountResponse
+    let canEdit: Bool
 
     @State private var isLoadingLanguages = true
     @State private var error: String?
@@ -19,16 +20,18 @@ struct LanguageListView: View {
                 .foregroundColor(.black)
                 .padding(.top, 15)
 
-            Button(action: {
-                languageEdit = nil
-                showLanguageForm = true
-            }) {
-                Text("Vytvořit")
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .cornerRadius(8)
+            if (canEdit) {
+                Button(action: {
+                    languageEdit = nil
+                    showLanguageForm = true
+                }) {
+                    Text("Vytvořit")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(8)
+                }
             }
 
             if let error = error {
@@ -46,7 +49,7 @@ struct LanguageListView: View {
 
             if !languages.isEmpty {
                 ForEach(Array(languages.enumerated()), id: \.offset) { index, language in
-                    LanguageBox(language: language, languageEdit: $languageEdit, onDeleteSubmit: onDeleteSubmit)
+                    LanguageBox(language: language, languageEdit: $languageEdit, onDeleteSubmit: onDeleteSubmit, canEdit: canEdit)
 
                     if index < languages.count - 1 {
                         Divider()
