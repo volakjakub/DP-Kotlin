@@ -72,20 +72,6 @@ struct BiographyDetailView: View {
                         SkillListView(biographyService: biographyService, biography: bio, account: account, skills: $skills, updateSkills: updateSkills, canEdit: canEdit)
                     }
                     .padding()
-                    .sheet(isPresented: $showForm) {
-                        BiographyFormView(
-                            biography: biography,
-                            account: account,
-                            onSubmit: { request in
-                                Task {
-                                    await handleFormSubmit(request: request)
-                                }
-                            },
-                            onClose: {
-                                showForm = false
-                            }
-                        )
-                    }
                 }
             }
         }
@@ -93,6 +79,20 @@ struct BiographyDetailView: View {
             Task {
                 await loadBiography()
             }
+        }
+        .sheet(isPresented: $showForm) {
+            BiographyFormView(
+                biography: biography,
+                account: account,
+                onSubmit: { request in
+                    Task {
+                        await handleFormSubmit(request: request)
+                    }
+                },
+                onClose: {
+                    showForm = false
+                }
+            )
         }
     }
 
