@@ -32,7 +32,7 @@ import org.adastra.curriculum.helper.ExpertiseHelper
 import org.adastra.curriculum.helper.LanguageHelper
 
 @Composable
-fun LanguageBox(language: LanguageResponse, onShowForm: (LanguageResponse) -> Unit, onDeleteSubmit: (LanguageResponse) -> Unit) {
+fun LanguageBox(language: LanguageResponse, onShowForm: (LanguageResponse) -> Unit, onDeleteSubmit: (LanguageResponse) -> Unit, canEdit: Boolean) {
     var isExpanded by remember { mutableStateOf(false) }
     var showDeleteMessage by remember { mutableStateOf(false) }
     val languageHelper = LanguageHelper()
@@ -106,27 +106,29 @@ fun LanguageBox(language: LanguageResponse, onShowForm: (LanguageResponse) -> Un
                         }
                     }
                 } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(7.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(Color.Blue),
-                            onClick = {
-                                onShowForm(language)
-                            }) {
-                            Text(
-                                "Upravit",
-                                color = Color.White,
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            colors = ButtonDefaults.buttonColors(Color.Red),
-                            onClick = {
-                                showDeleteMessage = true
-                            }) {
-                            Text("Odstranit")
+                    if (canEdit) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(7.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(Color.Blue),
+                                onClick = {
+                                    onShowForm(language)
+                                }) {
+                                Text(
+                                    "Upravit",
+                                    color = Color.White,
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                colors = ButtonDefaults.buttonColors(Color.Red),
+                                onClick = {
+                                    showDeleteMessage = true
+                                }) {
+                                Text("Odstranit")
+                            }
                         }
                     }
                 }

@@ -31,7 +31,7 @@ import org.adastra.curriculum.client.data.SkillResponse
 import org.adastra.curriculum.helper.ExpertiseHelper
 
 @Composable
-fun SkillBox(skill: SkillResponse, onShowForm: (SkillResponse) -> Unit, onDeleteSubmit: (SkillResponse) -> Unit) {
+fun SkillBox(skill: SkillResponse, onShowForm: (SkillResponse) -> Unit, onDeleteSubmit: (SkillResponse) -> Unit, canEdit: Boolean) {
     var isExpanded by remember { mutableStateOf(false) }
     var showDeleteMessage by remember { mutableStateOf(false) }
     val expertiseHelper = ExpertiseHelper()
@@ -99,28 +99,30 @@ fun SkillBox(skill: SkillResponse, onShowForm: (SkillResponse) -> Unit, onDelete
                         }
                     }
                 } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(7.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(Color.Blue),
-                            onClick = {
-                                onShowForm(skill)
-                            }) {
-                            Text(
-                                "Upravit",
-                                color = Color.White,
-                            )
-                        }
-                        if (skill.projects.isEmpty()) {
-                            Spacer(modifier = Modifier.width(8.dp))
+                    if (canEdit) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(7.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
                             Button(
-                                colors = ButtonDefaults.buttonColors(Color.Red),
+                                colors = ButtonDefaults.buttonColors(Color.Blue),
                                 onClick = {
-                                    showDeleteMessage = true
+                                    onShowForm(skill)
                                 }) {
-                                Text("Odstranit")
+                                Text(
+                                    "Upravit",
+                                    color = Color.White,
+                                )
+                            }
+                            if (skill.projects.isEmpty()) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Button(
+                                    colors = ButtonDefaults.buttonColors(Color.Red),
+                                    onClick = {
+                                        showDeleteMessage = true
+                                    }) {
+                                    Text("Odstranit")
+                                }
                             }
                         }
                     }

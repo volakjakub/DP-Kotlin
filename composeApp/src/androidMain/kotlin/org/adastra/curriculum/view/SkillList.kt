@@ -35,7 +35,7 @@ import org.adastra.curriculum.form.SkillFormDialog
 import org.adastra.curriculum.service.BiographyService
 
 @Composable
-fun SkillList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse, skills: List<SkillResponse>, updateSkills: (List<SkillResponse>) -> Unit) {
+fun SkillList(biographyService: BiographyService, biography: BiographyResponse, account: AccountResponse, skills: List<SkillResponse>, updateSkills: (List<SkillResponse>) -> Unit, canEdit: Boolean) {
     var isLoadingSkills by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var showSkillForm by remember { mutableStateOf(false) }
@@ -123,16 +123,18 @@ fun SkillList(biographyService: BiographyService, biography: BiographyResponse, 
         modifier = Modifier.padding(bottom = 10.dp, top = 15.dp)
             .fillMaxWidth()
     )
-    Button(
-        colors = ButtonDefaults.buttonColors(Color.Blue),
-        onClick = {
-            skillEdit = null
-            showSkillForm = true
-        }) {
-        Text(
-            "Vytvořit",
-            color = Color.White,
-        )
+    if (canEdit) {
+        Button(
+            colors = ButtonDefaults.buttonColors(Color.Blue),
+            onClick = {
+                skillEdit = null
+                showSkillForm = true
+            }) {
+            Text(
+                "Vytvořit",
+                color = Color.White,
+            )
+        }
     }
 
     if (showSkillForm) {
@@ -166,7 +168,7 @@ fun SkillList(biographyService: BiographyService, biography: BiographyResponse, 
     when {
         skills.isNotEmpty() -> {
             skills.forEachIndexed { index, skill ->
-                SkillBox(skill, onShowForm, onDeleteSubmit)
+                SkillBox(skill, onShowForm, onDeleteSubmit, canEdit)
                 if (index < skills.lastIndex) {
                     Divider(
                         color = Color.Gray,

@@ -32,7 +32,7 @@ import org.adastra.curriculum.client.data.EducationResponse
 import org.adastra.curriculum.helper.EducationHelper
 
 @Composable
-fun EducationBox(education: EducationResponse, onShowForm: (EducationResponse) -> Unit, onDeleteSubmit: (EducationResponse) -> Unit) {
+fun EducationBox(education: EducationResponse, onShowForm: (EducationResponse) -> Unit, onDeleteSubmit: (EducationResponse) -> Unit, canEdit: Boolean) {
     var isExpanded by remember { mutableStateOf(false) }
     var showDeleteMessage by remember { mutableStateOf(false) }
     val educationHelper = EducationHelper()
@@ -134,27 +134,29 @@ fun EducationBox(education: EducationResponse, onShowForm: (EducationResponse) -
                                 }
                             }
                         } else {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(7.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Button(
-                                    colors = ButtonDefaults.buttonColors(Color.Blue),
-                                    onClick = {
-                                        onShowForm(education)
-                                    }) {
-                                    Text(
-                                        "Upravit",
-                                        color = Color.White,
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Button(
-                                    colors = ButtonDefaults.buttonColors(Color.Red),
-                                    onClick = {
-                                        showDeleteMessage = true
-                                    }) {
-                                    Text("Odstranit")
+                            if (canEdit) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(7.dp),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Button(
+                                        colors = ButtonDefaults.buttonColors(Color.Blue),
+                                        onClick = {
+                                            onShowForm(education)
+                                        }) {
+                                        Text(
+                                            "Upravit",
+                                            color = Color.White,
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Button(
+                                        colors = ButtonDefaults.buttonColors(Color.Red),
+                                        onClick = {
+                                            showDeleteMessage = true
+                                        }) {
+                                        Text("Odstranit")
+                                    }
                                 }
                             }
                         }

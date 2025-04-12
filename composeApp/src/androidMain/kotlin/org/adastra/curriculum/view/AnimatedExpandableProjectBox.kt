@@ -31,7 +31,7 @@ import kotlinx.datetime.LocalDate
 import org.adastra.curriculum.client.data.ProjectResponse
 
 @Composable
-fun AnimatedExpandableProjectBox(project: ProjectResponse, onShowForm: (ProjectResponse) -> Unit, onDeleteSubmit: (ProjectResponse) -> Unit) {
+fun AnimatedExpandableProjectBox(project: ProjectResponse, onShowForm: (ProjectResponse) -> Unit, onDeleteSubmit: (ProjectResponse) -> Unit, canEdit: Boolean) {
     var isExpanded by remember { mutableStateOf(false) }
     var showDeleteMessage by remember { mutableStateOf(false) }
 
@@ -148,27 +148,29 @@ fun AnimatedExpandableProjectBox(project: ProjectResponse, onShowForm: (ProjectR
                                 }
                             }
                         } else {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(7.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Button(
-                                    colors = ButtonDefaults.buttonColors(Color.Blue),
-                                    onClick = {
-                                        onShowForm(project)
-                                    }) {
-                                    Text(
-                                        "Upravit",
-                                        color = Color.White,
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Button(
-                                    colors = ButtonDefaults.buttonColors(Color.Red),
-                                    onClick = {
-                                        showDeleteMessage = true
-                                    }) {
-                                    Text("Odstranit")
+                            if (canEdit) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(7.dp),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Button(
+                                        colors = ButtonDefaults.buttonColors(Color.Blue),
+                                        onClick = {
+                                            onShowForm(project)
+                                        }) {
+                                        Text(
+                                            "Upravit",
+                                            color = Color.White,
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Button(
+                                        colors = ButtonDefaults.buttonColors(Color.Red),
+                                        onClick = {
+                                            showDeleteMessage = true
+                                        }) {
+                                        Text("Odstranit")
+                                    }
                                 }
                             }
                         }
