@@ -6,12 +6,14 @@ struct ContentView: View {
     let backendApi: BackendApi
     let account: AccountResponse?
     let biographyService: BiographyService
+    let userService: UserService
 
     init(tokenWrapper: TokenManagerWrapper, backendApi: BackendApi) {
         self.tokenWrapper = tokenWrapper
         self.account = tokenWrapper.getAccount()
         self.backendApi = backendApi
         self.biographyService = BiographyService(tokenWrapper: tokenWrapper, backendApi: backendApi)
+        self.userService = UserService(tokenWrapper: tokenWrapper, backendApi: backendApi)
     }
 
     var body: some View {
@@ -28,7 +30,14 @@ struct ContentView: View {
 
                     if (account != nil) {
                         if tokenWrapper.getAccount()?.authorities.contains(Authority.roleAdmin) == true {
-                            // TODO: Admin view
+                            VStack {
+                                ScrollView {
+                                    VStack(spacing: 16) {
+                                        UserListView(biographyService: biographyService, userService: userService, account: account!)
+                                    }
+                                    .padding()
+                                }
+                            }
                         } else {
                             BiographyDetailView(biographyService: biographyService, account: account!)
                         }

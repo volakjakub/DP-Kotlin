@@ -88,13 +88,6 @@ struct LanguageListView: View {
         }
     }
 
-    private func onShowForm(language: LanguageResponse) {
-        DispatchQueue.main.async {
-            languageEdit = language
-            showLanguageForm = true
-        }
-    }
-
     private func onDeleteSubmit(language: LanguageResponse) {
         isLoadingLanguages = true
         Task {

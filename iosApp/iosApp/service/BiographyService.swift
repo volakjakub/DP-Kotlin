@@ -32,10 +32,10 @@ class BiographyService {
         }
     }
 
-    func getBiography() async throws -> BiographyResponse {
+    func getBiography(account: AccountResponse) async throws -> BiographyResponse {
         let (token, username) = try getAuthData()
         do {
-            let biography = try await backendApi.getBiography(token: token, username: username)
+            let biography = try await backendApi.getBiography(token: token, username: account.login)
             if (biography == nil) {
                 throw BiographyServiceError.notFoundError
             } else {

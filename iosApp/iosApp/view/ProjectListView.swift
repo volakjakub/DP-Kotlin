@@ -92,13 +92,6 @@ struct ProjectListView: View {
         }
     }
 
-    private func onShowForm(project: ProjectResponse) {
-        DispatchQueue.main.async {
-            projectEdit = project
-            showProjectForm = true
-        }
-    }
-
     private func onDeleteSubmit(project: ProjectResponse) {
         isLoadingProjects = true
         Task {

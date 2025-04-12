@@ -90,13 +90,6 @@ struct EducationListView: View {
         }
     }
 
-    private func onShowForm(education: EducationResponse) {
-        DispatchQueue.main.async {
-            educationEdit = education
-            showEducationForm = true
-        }
-    }
-
     private func onDeleteSubmit(education: EducationResponse) {
         isLoadingEducations = true
         Task {
