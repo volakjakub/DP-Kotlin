@@ -145,7 +145,6 @@ struct EducationFormDialog: View {
                 .padding()
                 .background(Color.white)
                 .cornerRadius(12)
-                .padding()
                 .onAppear {
                     selectedSchool = existingEducation?.school ?? ""
                     selectedType = existingEducation?.type ?? ""

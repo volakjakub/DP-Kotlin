@@ -96,7 +96,7 @@ struct BiographyDetailView: View {
     private func loadBiography() async {
         self.isLoadingBiography = true
         do {
-            self.biography = try await biographyService.getBiography()
+            self.biography = try await biographyService.getBiography(account: account)
             self.isNewUser = false
             
             if (self.biography != nil) {

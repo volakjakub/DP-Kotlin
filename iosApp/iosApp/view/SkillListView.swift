@@ -76,13 +76,6 @@ struct SkillListView: View {
         }
     }
 
-    private func onShowForm(skill: SkillResponse) {
-        DispatchQueue.main.async {
-            skillEdit = skill
-            showSkillForm = true
-        }
-    }
-
     private func onDeleteSubmit(skill: SkillResponse) {
         isLoadingSkills = true
         Task {
