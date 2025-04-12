@@ -24,6 +24,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.adastra.curriculum.client.data.AccountRequest
 import org.adastra.curriculum.client.data.AccountResponse
+import org.adastra.curriculum.client.data.AccountResponseCreate
 import org.adastra.curriculum.client.data.BiographyRequest
 import org.adastra.curriculum.client.data.BiographyResponse
 import org.adastra.curriculum.client.data.EducationRequest
@@ -437,30 +438,16 @@ class BackendApi(val baseUrl: String) {
             throw IllegalStateException("Invalid credentials (401). Please log in.")
         }
 
-        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Created) {
+        if (response.status == HttpStatusCode.OK) {
             val user: AccountResponse = response.body()
             return user
+        } else if (response.status == HttpStatusCode.Created) {
+            val user: AccountResponseCreate = response.body()
+            val accountResponse = AccountResponse(user.id, user.login, user.firstName, user.lastName, user.email, true, user.langKey, accountRequest.authorities)
+            return accountResponse
         } else {
             println("Invalid request. Please try again.")
             return null
-        }
-    }
-
-    suspend fun deleteUser(token: String, accountId: Int): Boolean {
-        var response: HttpResponse = client.delete("$baseUrl/api/users/$accountId") {
-            header(HttpHeaders.Authorization, "Bearer $token")
-        }
-
-        if (response.status == HttpStatusCode.Unauthorized) {
-            println("Invalid credentials (401). Please log in.")
-            throw IllegalStateException("Invalid credentials (401). Please log in.")
-        }
-
-        if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.NoContent) {
-            return true
-        } else {
-            println("Invalid request. Please try again.")
-            return false
         }
     }
 

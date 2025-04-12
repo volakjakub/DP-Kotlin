@@ -3,6 +3,8 @@ package org.adastra.curriculum
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +25,10 @@ import androidx.compose.ui.unit.dp
 import org.adastra.curriculum.auth.LoginViewModel
 import org.adastra.curriculum.client.data.Authority
 import org.adastra.curriculum.service.BiographyService
+import org.adastra.curriculum.service.UserService
 import org.adastra.curriculum.view.BiographyDetail
 import org.adastra.curriculum.view.Footer
+import org.adastra.curriculum.view.UserList
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -32,6 +36,7 @@ import org.adastra.curriculum.view.Footer
 fun App(loginViewModel: LoginViewModel) {
     val scrollState = rememberScrollState()
     val biographyService = BiographyService(loginViewModel)
+    val userService = UserService(loginViewModel)
     val account = loginViewModel.getAccount()
 
     MaterialTheme {
@@ -46,10 +51,29 @@ fun App(loginViewModel: LoginViewModel) {
                 )
 
                 if (account != null) {
-                    if (account.authorities.contains(Authority.ROLE_ADMIN) == true) {
-                        // TODO: Admin view
+                    if (account.activated) {
+                        if (account.authorities.contains(Authority.ROLE_ADMIN) == true) {
+                            Box(
+                                modifier = Modifier
+                                    .padding()
+                                    .background(Color.White)
+                                    .animateContentSize(tween(durationMillis = 300)),
+                                contentAlignment = Alignment.TopStart
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                                    UserList(userService, account)
+                                }
+                            }
+                        } else {
+                            BiographyDetail(biographyService, account)
+                        }
                     } else {
-                        BiographyDetail(biographyService, account)
+                        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                            Text(
+                                "Váš účet není aktivní. Kontaktujte administrátora.",
+                                color = Color.Black,
+                            )
+                        }
                     }
                 } else {
                     loginViewModel.logout()
