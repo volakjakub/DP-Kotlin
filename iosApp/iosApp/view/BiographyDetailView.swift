@@ -10,6 +10,7 @@ struct BiographyDetailView: View {
     @State private var isLoadingBiography = true
     @State private var error: String? = nil
     @State private var biography: BiographyResponse? = nil
+    @State private var skills: [SkillResponse] = []
 
     var body: some View {
         VStack {
@@ -64,8 +65,8 @@ struct BiographyDetailView: View {
 
                         LanguageListView(biographyService: biographyService, biography: bio, account: account)
                         EducationListView(biographyService: biographyService, biography: bio, account: account)
-                        ProjectListView(service: biographyService, biography: bio)
-                        SkillListView(biographyService: biographyService, biography: bio, account: account)
+                        ProjectListView(biographyService: biographyService, biography: bio, account: account, skills: $skills, updateSkills: updateSkills)
+                        SkillListView(biographyService: biographyService, biography: bio, account: account, skills: $skills, updateSkills: updateSkills)
                     }
                     .padding()
                     .sheet(isPresented: $showForm) {
@@ -97,6 +98,11 @@ struct BiographyDetailView: View {
         do {
             self.biography = try await biographyService.getBiography()
             self.isNewUser = false
+            
+            if (self.biography != nil) {
+                let loadedSkills = try await biographyService.getSkillsByBiography(biographyId: Int(self.biography!.id))
+                skills = loadedSkills
+            }
         } catch let error as BiographyServiceError {
             // Handle specific BiographyServiceError cases
             switch error {
@@ -111,6 +117,10 @@ struct BiographyDetailView: View {
             self.error = error.localizedDescription
         }
         self.isLoadingBiography = false
+    }
+    
+    private func updateSkills(s: [SkillResponse]) {
+        skills = s
     }
 
     private func handleFormSubmit(request: BiographyRequest) async {
