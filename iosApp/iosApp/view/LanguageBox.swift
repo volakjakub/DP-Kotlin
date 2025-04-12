@@ -6,6 +6,7 @@ struct LanguageBox: View {
     let language: LanguageResponse
     @Binding var languageEdit: LanguageResponse?
     let onDeleteSubmit: (LanguageResponse) -> Void
+    let canEdit: Bool
 
     @State private var isExpanded = false
     @State private var showDeleteMessage = false
@@ -60,28 +61,30 @@ struct LanguageBox: View {
                     }
                     .padding(7)
                 } else {
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            languageEdit = language
-                        }) {
-                            Text("Upravit")
-                                .foregroundColor(.white)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.blue)
+                    if (canEdit) {
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                languageEdit = language
+                            }) {
+                                Text("Upravit")
+                                    .foregroundColor(.white)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.blue)
 
-                        Spacer().frame(width: 8)
+                            Spacer().frame(width: 8)
 
-                        Button(action: {
-                            showDeleteMessage = true
-                        }) {
-                            Text("Odstranit")
+                            Button(action: {
+                                showDeleteMessage = true
+                            }) {
+                                Text("Odstranit")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.red)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
+                        .padding(7)
                     }
-                    .padding(7)
                 }
             }
         }

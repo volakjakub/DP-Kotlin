@@ -126,7 +126,7 @@ struct UserListView: View {
                 }
                 .padding()
             }
-            BiographyDetailView(biographyService: biographyService, account: accountBio!)
+            BiographyDetailView(biographyService: biographyService, account: accountBio!, canEdit: false)
         }
     }
     

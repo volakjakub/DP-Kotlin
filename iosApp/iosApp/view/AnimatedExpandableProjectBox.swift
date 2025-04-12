@@ -5,6 +5,7 @@ struct AnimatedExpandableProjectBox: View {
     let project: ProjectResponse
     @Binding var projectEdit: ProjectResponse?
     let onDeleteSubmit: (ProjectResponse) -> Void
+    let canEdit: Bool
     
     @State private var isExpanded: Bool = false
     @State private var showDeleteMessage = false
@@ -77,28 +78,30 @@ struct AnimatedExpandableProjectBox: View {
                     }
                     .padding(7)
                 } else {
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            projectEdit = project
-                        }) {
-                            Text("Upravit")
-                                .foregroundColor(.white)
+                    if (canEdit) {
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                projectEdit = project
+                            }) {
+                                Text("Upravit")
+                                    .foregroundColor(.white)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.blue)
+
+                            Spacer().frame(width: 8)
+
+                            Button(action: {
+                                showDeleteMessage = true
+                            }) {
+                                Text("Odstranit")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.red)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.blue)
-                        
-                        Spacer().frame(width: 8)
-                        
-                        Button(action: {
-                            showDeleteMessage = true
-                        }) {
-                            Text("Odstranit")
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
+                        .padding(7)
                     }
-                    .padding(7)
                 }
             }
         }

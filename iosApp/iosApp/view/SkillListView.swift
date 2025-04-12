@@ -7,6 +7,7 @@ struct SkillListView: View {
     let account: AccountResponse
     @Binding var skills: [SkillResponse]
     var updateSkills: ([SkillResponse]) -> Void
+    let canEdit: Bool
 
     @State private var isLoadingSkills = false
     @State private var error: String?
@@ -20,17 +21,19 @@ struct SkillListView: View {
                 .foregroundColor(.black)
                 .padding(.top, 15)
                 .padding(.bottom, 10)
-            
-            Button(action: {
-                skillEdit = nil
-                showSkillForm = true
-            }) {
-                Text("Vytvořit")
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .cornerRadius(8)
+
+            if (canEdit) {
+                Button(action: {
+                    skillEdit = nil
+                    showSkillForm = true
+                }) {
+                    Text("Vytvořit")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(8)
+                }
             }
 
             if let error = error {
@@ -48,7 +51,7 @@ struct SkillListView: View {
 
             if !skills.isEmpty {
                 ForEach(Array(skills.enumerated()), id: \.offset) { index, skill in
-                    SkillBox(skill: skill, skillEdit: $skillEdit, onDeleteSubmit: onDeleteSubmit)
+                    SkillBox(skill: skill, skillEdit: $skillEdit, onDeleteSubmit: onDeleteSubmit, canEdit: canEdit)
 
                     if index < skills.count - 1 {
                         Divider()

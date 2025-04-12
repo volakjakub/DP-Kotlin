@@ -5,6 +5,7 @@ struct EducationListView: View {
     let biographyService: BiographyService
     let biography: BiographyResponse
     let account: AccountResponse
+    let canEdit: Bool
 
     @State private var isLoadingEducations = true
     @State private var error: String?
@@ -20,16 +21,18 @@ struct EducationListView: View {
                 .padding(.top, 15)
                 .padding(.bottom, 10)
 
-            Button(action: {
-                educationEdit = nil
-                showEducationForm = true
-            }) {
-                Text("Vytvořit")
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .cornerRadius(8)
+            if (canEdit) {
+                Button(action: {
+                    educationEdit = nil
+                    showEducationForm = true
+                }) {
+                    Text("Vytvořit")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(8)
+                }
             }
             
             if let error = error {
@@ -47,7 +50,7 @@ struct EducationListView: View {
 
             if !educations.isEmpty {
                 ForEach(Array(educations.enumerated()), id: \.offset) { index, education in
-                    EducationBox(education: education, educationEdit: $educationEdit, onDeleteSubmit: onDeleteSubmit)
+                    EducationBox(education: education, educationEdit: $educationEdit, onDeleteSubmit: onDeleteSubmit, canEdit: canEdit)
 
                     if index < educations.count - 1 {
                         Divider()

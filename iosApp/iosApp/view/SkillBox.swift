@@ -5,6 +5,7 @@ struct SkillBox: View {
     var skill: SkillResponse
     @Binding var skillEdit: SkillResponse?
     let onDeleteSubmit: (SkillResponse) -> Void
+    let canEdit: Bool
     // Initialize the helper
     let expertiseHelper = ExpertiseHelper()
     
@@ -58,30 +59,32 @@ struct SkillBox: View {
                     }
                     .padding(7)
                 } else {
-                    HStack {
-                        Spacer()
-                        Button(action: {
-                            skillEdit = skill
-                        }) {
-                            Text("Upravit")
-                                .foregroundColor(.white)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.blue)
-
-                        if (skill.projects.isEmpty) {
-                            Spacer().frame(width: 8)
-                            
+                    if (canEdit) {
+                        HStack {
+                            Spacer()
                             Button(action: {
-                                showDeleteMessage = true
+                                skillEdit = skill
                             }) {
-                                Text("Odstranit")
+                                Text("Upravit")
+                                    .foregroundColor(.white)
                             }
                             .buttonStyle(.borderedProminent)
-                            .tint(.red)
+                            .tint(.blue)
+
+                            if (skill.projects.isEmpty) {
+                                Spacer().frame(width: 8)
+
+                                Button(action: {
+                                    showDeleteMessage = true
+                                }) {
+                                    Text("Odstranit")
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.red)
+                            }
                         }
+                        .padding(7)
                     }
-                    .padding(7)
                 }
             }
         }

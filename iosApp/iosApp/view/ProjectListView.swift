@@ -7,6 +7,7 @@ struct ProjectListView: View {
     let account: AccountResponse
     @Binding var skills: [SkillResponse]
     var updateSkills: ([SkillResponse]) -> Void
+    let canEdit: Bool
 
     @State private var isLoadingProjects = true
     @State private var error: String?
@@ -21,16 +22,19 @@ struct ProjectListView: View {
                 .foregroundColor(.black)
                 .padding(.top, 15)
                 .padding(.bottom, 10)
-            Button(action: {
-                projectEdit = nil
-                showProjectForm = true
-            }) {
-                Text("Vytvořit")
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .cornerRadius(8)
+
+            if (canEdit) {
+                Button(action: {
+                    projectEdit = nil
+                    showProjectForm = true
+                }) {
+                    Text("Vytvořit")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(8)
+                }
             }
 
             if let error = error {
@@ -48,7 +52,7 @@ struct ProjectListView: View {
 
             if !projects.isEmpty {
                 ForEach(Array(projects.enumerated()), id: \.offset) { index, project in
-                    AnimatedExpandableProjectBox(project: project, projectEdit: $projectEdit, onDeleteSubmit: onDeleteSubmit)
+                    AnimatedExpandableProjectBox(project: project, projectEdit: $projectEdit, onDeleteSubmit: onDeleteSubmit, canEdit: canEdit)
 
                     if index < projects.count - 1 {
                         Divider()
